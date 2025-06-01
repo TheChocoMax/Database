@@ -13,10 +13,7 @@
             "terminal.integrated.shell.linux": "/bin/bash"
         },
         "vscode": {
-            "extensions": [
-                "esbenp.prettier-vscode",
-                "mtxr.sqltools"
-            ]
+            "extensions": ["esbenp.prettier-vscode", "mtxr.sqltools"]
         }
     },
     "postCreateCommand": "initdb -D $PGDATA && pg_ctl -D $PGDATA -o '-k /run/postgresql' -l /tmp/pg.log start && createdb chocomax",
