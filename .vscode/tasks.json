@@ -18,6 +18,31 @@
             "presentation": {
                 "showReuseMessage": false
             }
+        },
+        {
+            "label": "Flatten SQL Files",
+            "type": "shell",
+            "command": "./scripts/flatten-sql.sh",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Rebuild Database",
+            "type": "shell",
+            "command": "psql -h /run/postgresql -U ${input:db_username} -d ${input:db_name} -c 'DO $$ DECLARE r RECORD; BEGIN FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = ''public'') LOOP EXECUTE ''DROP TABLE IF EXISTS '' || quote_ident(r.tablename) || '' CASCADE''; END LOOP; END $$;' && for file in flattened-sql/*.sql; do echo \"Running $file...\"; psql -h /run/postgresql -U ${input:db_username} -d ${input:db_name} -f \"$file\"; done",
+            "problemMatcher": [],
+            "dependsOn": [
+                "Flatten SQL Files"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
         }
     ],
     "inputs": [

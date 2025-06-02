@@ -16,10 +16,9 @@ VOLUME ["/docker-entrypoint-initdb.d"]
 COPY . ${TEMP_SQL_DIR}/
 
 # Flatten the directory structure and rename files to include folder names
-RUN find "${TEMP_SQL_DIR:?}/" -type f -name "*.sql" | while read -r file; do \
-    new_name=$(echo "$file" | sed "s|${TEMP_SQL_DIR:?}/||" | sed 's|/|_|g' | sed 's|^_||'); \
-    cp "$file" "/docker-entrypoint-initdb.d/$new_name"; \
-    done && \
+COPY ./scripts/flatten-sql.sh /usr/local/bin/flatten-sql.sh
+RUN chmod +x /usr/local/bin/flatten-sql.sh && \
+    /usr/local/bin/flatten-sql.sh "${TEMP_SQL_DIR}" "/docker-entrypoint-initdb.d" && \
     rm -rf "${TEMP_SQL_DIR:?}/"
 
 RUN chown -R postgres:postgres /docker-entrypoint-initdb.d
