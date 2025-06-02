@@ -25,6 +25,10 @@ jobs:
             dockerfile_path: ./Dockerfile
             context: .devcontainer
 
+          - image_name: Production
+            dockerfile_path: ./Dockerfile
+            context: .
+
     with:
       image_name: ${{ matrix.image_name }}
       dockerfile_path: ${{ matrix.dockerfile_path }}
