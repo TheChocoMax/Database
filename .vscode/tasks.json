@@ -2,6 +2,15 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Connect to Database",
+            "type": "shell",
+            "command": "psql -h /run/postgresql -U ${input:db_username} -d ${input:db_name}",
+            "problemMatcher": [],
+            "presentation": {
+                "close": true
+            }
+        },
+        {
             "label": "Delete old Git branches",
             "type": "shell",
             "command": "git fetch --prune && git fetch -p ; git branch -r | awk '{print $1}' | egrep -v -f /dev/fd/0 <(git branch -vv | grep origin) | awk '{print $1}' | xargs git branch -D",
@@ -9,6 +18,44 @@
             "presentation": {
                 "showReuseMessage": false
             }
+        },
+        {
+            "label": "Flatten SQL Files",
+            "type": "shell",
+            "command": "./scripts/flatten-sql.sh",
+            "problemMatcher": [],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
+            "label": "Rebuild Database",
+            "type": "shell",
+            "command": "./scripts/rebuild-db.sh",
+            "args": ["${input:db_username}", "${input:db_name}"],
+            "dependsOn": ["Flatten SQL Files"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        }
+    ],
+    "inputs": [
+        {
+            "id": "db_username",
+            "type": "promptString",
+            "description": "Enter the database username",
+            "default": "vscode"
+        },
+        {
+            "id": "db_name",
+            "type": "promptString",
+            "description": "Enter the database name",
+            "default": "postgres"
         }
     ]
 }

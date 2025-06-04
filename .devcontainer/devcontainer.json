@@ -1,13 +1,21 @@
 {
-    "name": "Template Development Container",
+    "name": "ChocoMax Database Development Container",
     "dockerFile": "Dockerfile",
+    "runArgs": [
+        "--cap-add=CHOWN",
+        "--cap-add=SETGID",
+        "--cap-add=SETUID",
+        "--cap-drop=ALL",
+        "--security-opt=no-new-privileges:true"
+    ],
     "customizations": {
         "settings": {
             "terminal.integrated.shell.linux": "/bin/bash"
         },
         "vscode": {
-            "extensions": ["esbenp.prettier-vscode"]
+            "extensions": ["esbenp.prettier-vscode", "mtxr.sqltools"]
         }
     },
+    "postCreateCommand": "initdb -D $PGDATA && pg_ctl -D $PGDATA -o '-k /run/postgresql' -l /tmp/pg.log start && createdb chocomax",
     "remoteUser": "vscode"
 }
