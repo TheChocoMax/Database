@@ -1,4 +1,4 @@
-FROM alpine:3.21
+FROM alpine:3.22
 
 # Install common tools and PostgreSQL
 RUN apk add --no-cache bash git \
