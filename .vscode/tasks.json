@@ -32,13 +32,8 @@
             "label": "Rebuild Database",
             "type": "shell",
             "command": "./scripts/rebuild-db.sh",
-            "args": [
-                "${input:db_username}",
-                "${input:db_name}"
-            ],
-            "dependsOn": [
-                "Flatten SQL Files"
-            ],
+            "args": ["${input:db_username}", "${input:db_name}"],
+            "dependsOn": ["Flatten SQL Files"],
             "group": {
                 "kind": "build",
                 "isDefault": true
