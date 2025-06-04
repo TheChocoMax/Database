@@ -1,6 +1,9 @@
 # Build output
 flattened-sql/
 
+# Database session files
+*.session.sql
+
 # Docs and meta
 README.md
 LICENSE
