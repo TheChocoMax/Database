@@ -17,10 +17,9 @@ GRANT ALL PRIVILEGES ON DATABASE chocomax TO chocomax_admin;
 
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
+    username TEXT UNIQUE NOT NULL,
     email_encrypted TEXT NOT NULL,
     email_hash TEXT UNIQUE NOT NULL,
-    username TEXT UNIQUE NOT NULL,
-    password_encrypted TEXT NOT NULL,
     password_hash TEXT NOT NULL,
     phone_encrypted TEXT,
     phone_hash TEXT UNIQUE,
