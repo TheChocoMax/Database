@@ -8,6 +8,7 @@ DEST_DIR="${2:-flattened-sql}"
 
 echo "📦 Flattening SQL files from '$SRC_DIR' to '$DEST_DIR'..."
 
+rm -rf "$DEST_DIR"
 mkdir -p "$DEST_DIR"
 
 find "$SRC_DIR" -type f -name "*.sql" ! -name "*.session.sql" | while read -r file; do

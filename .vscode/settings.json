@@ -11,13 +11,14 @@
     },
     "sqltools.connections": [
         {
-            "previewLimit": 50,
-            "server": "localhost",
-            "port": 5432,
-            "driver": "PostgreSQL",
             "name": "ChocoMax",
+            "server": "localhost",
+            "driver": "PostgreSQL",
+            "port": 5432,
             "database": "chocomax",
-            "username": "vscode"
+            "username": "vscode",
+            "askForPassword": false,
+            "password": "postgres",
         }
     ]
 }
