@@ -1,6 +1,3 @@
--- Connect to the chocomax database before running
--- \c chocomax;
-
 -- Log a login attempt (used in both success and failure cases)
 CREATE OR REPLACE PROCEDURE log_login_attempt(
     p_user_id INTEGER,
@@ -85,7 +82,7 @@ BEGIN
         CALL handle_successful_login(v_user_id, p_ip_address, p_user_agent);
         RETURN TRUE;
     ELSE
-        -- Failed login: log with NULL user_id (or you can try to resolve user ID by username alone)
+        -- Failed login: log with NULL user_id
         CALL log_login_attempt(NULL, p_ip_address, p_user_agent, FALSE);
         RETURN FALSE;
     END IF;
