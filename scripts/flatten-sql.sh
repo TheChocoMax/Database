@@ -11,7 +11,7 @@ echo "📦 Flattening SQL files from '$SRC_DIR' to '$DEST_DIR'..."
 rm -rf "$DEST_DIR"
 mkdir -p "$DEST_DIR"
 
-find "$SRC_DIR" -type f -name "*.sql" ! -name "*.session.sql" | while read -r file; do
+find "$SRC_DIR" -type f -name "*.sql" ! -name "*.session.sql" ! -name "*.test.sql" | while read -r file; do
     # Remove leading './' from the file path
     clean_path=$(echo "$file" | sed 's|^\./||')
     # Flatten the path by replacing '/' with '_'

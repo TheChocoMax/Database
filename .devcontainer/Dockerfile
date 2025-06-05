@@ -1,8 +1,15 @@
 FROM alpine:3.22
 
-# Install common tools and PostgreSQL
+# Install common tools, PostgreSQL and build tools for pgTAP
 RUN apk add --no-cache bash git \
-    postgresql postgresql-contrib su-exec tini
+    postgresql postgresql-contrib su-exec tini \
+    make gcc musl-dev postgresql-dev perl patch \
+    build-base perl-dev openssl-dev \
+    && cpan TAP::Parser::SourceHandler::pgTAP
+
+# Build and install pgTAP from source
+RUN git clone --depth 1 https://github.com/theory/pgtap && \
+    cd pgtap && make && make install && cd .. && rm -rf pgtap
 
 # Setup default user
 ARG USERNAME=vscode

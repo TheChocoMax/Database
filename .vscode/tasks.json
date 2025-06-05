@@ -83,6 +83,19 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Run Unit Tests",
+            "type": "shell",
+            "command": "pg_prove -Q -d ${input:db_name} -U ${input:db_username} database/tests/*.test.sql",
+            "dependsOn": [
+                "Full Database Rebuild"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
         }
     ],
     "inputs": [
