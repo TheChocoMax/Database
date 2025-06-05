@@ -86,7 +86,7 @@ BEGIN
         RETURN TRUE;
     ELSE
         -- Failed login: log with NULL user_id (or you can try to resolve user ID by username alone)
-        PERFORM log_login_attempt(NULL, p_ip_address, p_user_agent, FALSE);
+        CALL log_login_attempt(NULL, p_ip_address, p_user_agent, FALSE);
         RETURN FALSE;
     END IF;
 END;
