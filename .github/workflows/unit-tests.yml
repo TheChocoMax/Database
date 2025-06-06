@@ -1,0 +1,67 @@
+name: Run Unit Tests
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PG_VERSION: 17.5-alpine3.22
+  PG_USER: postgres
+  PG_PASSWORD: postgres
+  PG_DATABASE: chocomax
+  PG_HOST: localhost
+  PG_PORT: 5432
+
+jobs:
+  pgtap:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:${{ env.PG_VERSION }}
+        env:
+          POSTGRES_PASSWORD: ${{ env.PG_PASSWORD }}
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - ${{ env.PG_PORT }}:${{ env.PG_PORT }}
+
+    steps:
+      - name: Checkout repository
+      - uses: actions/checkout@v4
+
+      - name: install pg_prove
+        run: sudo cpan TAP::Parser::SourceHandler::pgTAP
+        env:
+          SHELL: /bin/bash
+
+      - name: install postgres dev
+        run: sudo apt-get install -y --no-install-recommends postgresql-server-dev-17.5
+
+      - name: Checkout PgTAP
+        uses: actions/checkout@v4
+        with:
+          repository: theory/pgtap
+          path: pgtap
+          ref: v1.3.3
+
+      - name: install PgTAP
+        working-directory: pgtap
+        run: make && psql --host ${{ env.PG_HOST }} -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} --file sql/pgtap.sql
+        env:
+          PGPASSWORD: ${{ env.PG_PASSWORD }}
+
+      - name: Load SQL
+        run: >-
+          psql --host ${{ env.PG_HOST }} -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} --file my_function.sql
+        env:
+          PGPASSWORD: ${{ env.PG_PASSWORD }}
+
+      - name: Run tests
+        run: pg_prove --host ${{ env.PG_HOST }} -d ${{ env.PG_DATABASE }} -U ${{ env.PG_USER }} database/tests/*.test.sql
+        env:
+          PGPASSWORD: ${{ env.PG_PASSWORD }}
