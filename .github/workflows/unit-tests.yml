@@ -1,17 +1,16 @@
----
 name: Run Unit Tests
 
 on:
   push:
-    branches:
-      - main
-  pull_request: null
+    branches: [main]
+  pull_request:
   workflow_dispatch:
 
 env:
   PG_USER: postgres
   PG_PASSWORD: postgres
   PG_DATABASE: chocomax
+  PG_HOST: localhost
 
 jobs:
   pgtap:
@@ -22,55 +21,39 @@ jobs:
       postgres:
         image: postgres:17.5-alpine3.22
         env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: chocomax
+          POSTGRES_PASSWORD: ${{ env.PG_PASSWORD }}
+          POSTGRES_DB: ${{ env.PG_DATABASE }}
+        ports:
+          - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U $PG_USER"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        ports:
-          - 5432:5432
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install pgTAP and dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget gnupg lsb-release
-          echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | \
-            sudo tee /etc/apt/sources.list.d/pgdg.list
-          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
           sudo apt-get update
           sudo apt-get install -y \
-            postgresql-client-17 \
-            postgresql-server-dev-17 \
-            libdbd-pg-perl \
-            make \
-            gcc \
-            cpanminus
+            make gcc cpanminus \
+            postgresql-client \
+            libdbd-pg-perl
           sudo cpanm TAP::Parser::SourceHandler::pgTAP
 
-      - name: Checkout PgTAP
-        uses: actions/checkout@v4
-        with:
-          repository: theory/pgtap
-          path: pgtap
-          ref: v1.3.3
+          # Clone PgTAP
+          git clone --depth 1 --branch v1.3.3 https://github.com/theory/pgtap.git
 
-      - name: Install PgTAP to database
-        working-directory: pgtap
-        run: |
+          # Install pgTAP into the database
+          cd pgtap
           make
-          psql -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} -f sql/pgtap.sql
-        env:
-          PGPASSWORD: ${{ env.PG_PASSWORD }}
+          PGPASSWORD=${{ env.PG_PASSWORD }} psql -h ${{ env.PG_HOST }} -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} -f sql/pgtap.sql
 
       - name: Load SQL files
         run: |
-          # Flatten SQL files
           mkdir flattened-sql
           find database -type f -name "*.sql" ! -name "*.session.sql" ! -name "*.test.sql" | while read -r file; do
             clean_path=$(echo "$file" | sed 's|^\./||')
@@ -79,17 +62,13 @@ jobs:
             echo "✅ Copied: $file → flattened-sql/$new_name"
           done
 
-          # Run them all
           find flattened-sql -maxdepth 1 -name "*.sql" | while read -r file; do
             echo "➡️ Running $file..."
-            psql -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} -f "$file"
+            PGPASSWORD=${{ env.PG_PASSWORD }} psql -h ${{ env.PG_HOST }} -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} -f "$file"
           done
 
-          # Clean up
           rm -rf flattened-sql
 
       - name: Run tests
         run: |
-          pg_prove -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} database/tests/*.test.sql
-        env:
-          PGPASSWORD: ${{ env.PG_PASSWORD }}
+          PGPASSWORD=${{ env.PG_PASSWORD }} pg_prove -h ${{ env.PG_HOST }} -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} database/tests/*.test.sql
