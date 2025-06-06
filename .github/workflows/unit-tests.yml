@@ -68,11 +68,25 @@ jobs:
         env:
           PGPASSWORD: ${{ env.PG_PASSWORD }}
 
-      - name: Load your SQL files
+      - name: Load SQL files
         run: |
-          psql -h ${{ env.PG_HOST }} -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} -f my_function.sql
-        env:
-          PGPASSWORD: ${{ env.PG_PASSWORD }}
+          # Flatten SQL files
+          mkdir flattened-sql
+          find database -type f -name "*.sql" ! -name "*.session.sql" ! -name "*.test.sql" | while read -r file; do
+            clean_path=$(echo "$file" | sed 's|^\./||')
+            new_name=$(echo "$clean_path" | sed 's|/|_|g')
+            cp "$file" "flattened-sql/$new_name"
+            echo "✅ Copied: $file → flattened-sql/$new_name"
+          done
+
+          # Run them all
+          find flattened-sql -maxdepth 1 -name "*.sql" | while read -r file; do
+            echo "➡️ Running $file..."
+            psql -h ${{ env.PG_HOST }} -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} -f "$file"
+          done
+
+          # Clean up
+          rm -rf flattened-sql
 
       - name: Run tests
         run: |
