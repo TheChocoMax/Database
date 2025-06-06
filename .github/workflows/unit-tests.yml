@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  PG_VERSION: 17
+  PG_VERSION: 17.5
   PG_PORT: 5432
   PG_USER: postgres
   PG_PASSWORD: postgres
@@ -25,11 +25,15 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            wget gnupg lsb-release ca-certificates curl \
+            postgresql \
+            postgresql-client \
+            postgresql-server-dev-all \
             make gcc libdbd-pg-perl libpq-dev \
-            postgresql-${PG_VERSION} postgresql-server-dev-${PG_VERSION} postgresql-client-${PG_VERSION} \
             cpanminus
           sudo cpanm TAP::Parser::SourceHandler::pgTAP
+
+      - name: Check PostgreSQL version
+        run: psql --version
 
       - name: Start PostgreSQL
         run: |
