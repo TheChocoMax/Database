@@ -22,7 +22,7 @@ AS $$
 BEGIN
     -- Update login timestamp
     UPDATE users SET last_login_at = NOW(), updated_at = NOW()
-    WHERE id = p_user_id;
+    WHERE user_id = p_user_id;
 
     -- Log success
     CALL log_login_attempt(p_user_id, p_ip_address, p_user_agent, TRUE);
@@ -35,19 +35,19 @@ DECLARE
     v_enabled BOOLEAN;
 BEGIN
     SELECT is_enabled INTO v_enabled
-    FROM user_2fa
+    FROM user_authentication_methods
     WHERE user_id = p_user_id;
 
     RETURN COALESCE(v_enabled, FALSE);
 END;
 $$ LANGUAGE plpgsql;
 
--- Get the user's 2FA secret and method
-CREATE OR REPLACE FUNCTION get_user_2fa_secret(p_user_id INTEGER) RETURNS TABLE(method TEXT, secret TEXT) AS $$
+-- Get the user's authentication methods secret
+CREATE OR REPLACE FUNCTION get_user_authentication_method_secret(p_user_id INTEGER) RETURNS TABLE(method TEXT, secret TEXT) AS $$
 BEGIN
     RETURN QUERY
-    SELECT method, secret
-    FROM user_2fa
+    SELECT authentication_method, user_authentication_method_secret
+    FROM user_authentication_methods
     WHERE user_id = p_user_id AND is_enabled = TRUE;
 END;
 $$ LANGUAGE plpgsql;
@@ -55,7 +55,7 @@ $$ LANGUAGE plpgsql;
 -- Disable 2FA for a user
 CREATE OR REPLACE FUNCTION disable_2fa(p_user_id INTEGER) RETURNS VOID AS $$
 BEGIN
-    UPDATE user_2fa
+    UPDATE user_authentication_methods
     SET is_enabled = FALSE, updated_at = NOW()
     WHERE user_id = p_user_id;
 END;
@@ -72,7 +72,7 @@ DECLARE
     v_user_id INTEGER;
 BEGIN
     -- Attempt to find the user by username and hashed password
-    SELECT id INTO v_user_id
+    SELECT user_id INTO v_user_id
     FROM users
     WHERE username = p_username AND password_hash = p_password_hash
     LIMIT 1;
