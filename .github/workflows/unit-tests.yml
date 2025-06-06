@@ -12,10 +12,10 @@ env:
   PG_USER: postgres
   PG_PASSWORD: postgres
   PG_DATABASE: chocomax
-  PG_HOST: postgres
 
 jobs:
   pgtap:
+    name: Run PgTAP Tests
     runs-on: ubuntu-latest
 
     services:
@@ -64,7 +64,7 @@ jobs:
         working-directory: pgtap
         run: |
           make
-          psql -h ${{ env.PG_HOST }} -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} -f sql/pgtap.sql
+          psql -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} -f sql/pgtap.sql
         env:
           PGPASSWORD: ${{ env.PG_PASSWORD }}
 
@@ -82,7 +82,7 @@ jobs:
           # Run them all
           find flattened-sql -maxdepth 1 -name "*.sql" | while read -r file; do
             echo "➡️ Running $file..."
-            psql -h ${{ env.PG_HOST }} -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} -f "$file"
+            psql -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} -f "$file"
           done
 
           # Clean up
@@ -90,6 +90,6 @@ jobs:
 
       - name: Run tests
         run: |
-          pg_prove -h ${{ env.PG_HOST }} -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} database/tests/*.test.sql
+          pg_prove -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} database/tests/*.test.sql
         env:
           PGPASSWORD: ${{ env.PG_PASSWORD }}
