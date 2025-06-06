@@ -71,4 +71,4 @@ jobs:
 
       - name: Run pgTAP tests
         run: |
-          pg_prove -d "$PG_DATABASE" -U "$PG_USER" database/tests/*.test.sql
+          sudo -u postgres pg_prove -d "$PG_DATABASE" database/tests/*.test.sql
