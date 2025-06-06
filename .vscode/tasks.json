@@ -96,6 +96,19 @@
                 "kind": "test",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Lint SQL File",
+            "type": "shell",
+            "command": "sqlfluff fix '${file}' -v",
+            "group": {
+                "kind": "none",
+                "isDefault": true
+            },
+            "problemMatcher": [],
+            "runOptions": {
+                "runOn": "default"
+            }
         }
     ],
     "inputs": [

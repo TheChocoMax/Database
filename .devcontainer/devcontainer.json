@@ -15,6 +15,7 @@
         "vscode": {
             "extensions": [
                 "esbenp.prettier-vscode",
+                "gruntfuggly.triggertaskonsave",
                 "mtxr.sqltools",
                 "mtxr.sqltools-driver-pg"
             ]

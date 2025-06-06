@@ -20,5 +20,10 @@
             "askForPassword": false,
             "password": "postgres",
         }
-    ]
+    ],
+    "triggerTaskOnSave.tasks": {
+        "Lint SQL File": [
+            "**/*.sql"
+        ]
+    }
 }
