@@ -22,25 +22,24 @@ jobs:
         image: postgres:${{ env.PG_VERSION }}
         env:
           POSTGRES_PASSWORD: ${{ env.PG_PASSWORD }}
+          POSTGRES_DB: ${{ env.PG_DATABASE }}
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
         ports:
-          - ${{ env.PG_PORT }}:${{ env.PG_PORT }}
+          - ${{ env.PG_PORT }}:5432
 
     steps:
       - name: Checkout repository
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
 
-      - name: install pg_prove
-        run: sudo cpan TAP::Parser::SourceHandler::pgTAP
-        env:
-          SHELL: /bin/bash
-
-      - name: install postgres dev
-        run: sudo apt-get install -y --no-install-recommends postgresql-server-dev-17.5
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client libdbd-pg-perl make gcc postgresql-server-dev-all cpanminus
+          sudo cpanm TAP::Parser::SourceHandler::pgTAP
 
       - name: Checkout PgTAP
         uses: actions/checkout@v4
@@ -49,19 +48,22 @@ jobs:
           path: pgtap
           ref: v1.3.3
 
-      - name: install PgTAP
+      - name: Install PgTAP to database
         working-directory: pgtap
-        run: make && psql --host ${{ env.PG_HOST }} -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} --file sql/pgtap.sql
+        run: |
+          make
+          psql -h ${{ env.PG_HOST }} -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} -f sql/pgtap.sql
         env:
           PGPASSWORD: ${{ env.PG_PASSWORD }}
 
-      - name: Load SQL
-        run: >-
-          psql --host ${{ env.PG_HOST }} -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} --file my_function.sql
+      - name: Load your SQL files
+        run: |
+          psql -h ${{ env.PG_HOST }} -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} -f my_function.sql
         env:
           PGPASSWORD: ${{ env.PG_PASSWORD }}
 
       - name: Run tests
-        run: pg_prove --host ${{ env.PG_HOST }} -d ${{ env.PG_DATABASE }} -U ${{ env.PG_USER }} database/tests/*.test.sql
+        run: |
+          pg_prove -h ${{ env.PG_HOST }} -U ${{ env.PG_USER }} -d ${{ env.PG_DATABASE }} database/tests/*.test.sql
         env:
           PGPASSWORD: ${{ env.PG_PASSWORD }}
