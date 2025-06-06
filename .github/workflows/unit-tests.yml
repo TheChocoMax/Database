@@ -14,6 +14,7 @@ env:
 
 jobs:
   unit-tests:
+    name: Run PostgreSQL Unit Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -44,17 +45,16 @@ jobs:
       - name: Start PostgreSQL
         run: |
           sudo systemctl start postgresql
-          sudo -u postgres psql -c "CREATE USER $PG_USER WITH SUPERUSER PASSWORD '$PG_PASSWORD';"
-          sudo -u postgres createdb -O $PG_USER $PG_DATABASE
+          sudo -u ${{ env.PG_USER }} createdb -O $PG_USER $PG_DATABASE
         env:
-          PGUSER: postgres
+          PGUSER: ${{ env.PG_USER }}
 
       - name: Build and install pgTAP
         run: |
           git clone --depth 1 https://github.com/theory/pgtap
           cd pgtap
           make
-          sudo -u postgres psql -d $PG_DATABASE -f sql/pgtap.sql
+          sudo -u ${{ env.PG_USER }} psql -d $PG_DATABASE -f sql/pgtap.sql
           cd .. && rm -rf pgtap
 
       - name: Flatten and load schema SQL files
