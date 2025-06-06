@@ -7,10 +7,9 @@ on:
   workflow_dispatch:
 
 env:
-  PG_PORT: 5432
   PG_USER: postgres
-  PG_PASSWORD: postgres
   PG_DATABASE: chocomax
+  PGHOST: /var/run/postgresql
 
 jobs:
   unit-tests:
@@ -46,8 +45,6 @@ jobs:
         run: |
           sudo systemctl start postgresql
           sudo -u $PG_USER createdb -O $PG_USER $PG_DATABASE
-        env:
-          PGUSER: $PG_USER
 
       - name: Build and install pgTAP
         run: |
@@ -69,13 +66,9 @@ jobs:
 
           find flattened-sql -maxdepth 1 -name "*.sql" | while read -r file; do
             echo "➡️ Running $file..."
-            psql -U $PG_USER -d $PG_DATABASE -h localhost -p $PG_PORT -f "$file"
+            psql -h "$PGHOST" -U "$PG_USER" -d "$PG_DATABASE" -f "$file"
           done
-        env:
-          PGPASSWORD: $PG_PASSWORD
 
       - name: Run pgTAP tests
         run: |
-          pg_prove -U $PG_USER -d $PG_DATABASE -h localhost -p $PG_PORT database/tests/*.test.sql
-        env:
-          PGPASSWORD: $PG_PASSWORD
+          pg_prove -d $PG_DATABASE -U $PG_USER database/tests/*.test.sql
