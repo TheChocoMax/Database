@@ -1,11 +1,3 @@
--- Create the main ChocoMax database
-
-CREATE DATABASE chocomax
-WITH ENCODING 'UTF8'
-LC_COLLATE = 'en_US.UTF-8'
-LC_CTYPE = 'en_US.UTF-8'
-TEMPLATE = template0;
-
 -- TODO: Use environment variables for sensitive data and remove hardcoded values
 CREATE USER chocomax_admin WITH PASSWORD 'strong_password';
 GRANT ALL PRIVILEGES ON DATABASE chocomax TO chocomax_admin;
