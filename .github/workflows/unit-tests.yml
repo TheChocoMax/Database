@@ -45,16 +45,16 @@ jobs:
       - name: Start PostgreSQL
         run: |
           sudo systemctl start postgresql
-          sudo -u ${{ env.PG_USER }} createdb -O $PG_USER $PG_DATABASE
+          sudo -u $PG_USER createdb -O $PG_USER $PG_DATABASE
         env:
-          PGUSER: ${{ env.PG_USER }}
+          PGUSER: $PG_USER
 
       - name: Build and install pgTAP
         run: |
           git clone --depth 1 https://github.com/theory/pgtap
           cd pgtap
           make
-          sudo -u ${{ env.PG_USER }} psql -d $PG_DATABASE -f sql/pgtap.sql
+          sudo -u $PG_USER psql -d $PG_DATABASE -f sql/pgtap.sql
           cd .. && rm -rf pgtap
 
       - name: Flatten and load schema SQL files
@@ -71,9 +71,11 @@ jobs:
             echo "➡️ Running $file..."
             psql -U $PG_USER -d $PG_DATABASE -h localhost -p $PG_PORT -f "$file"
           done
+        env:
+          PGPASSWORD: $PG_PASSWORD
 
       - name: Run pgTAP tests
         run: |
           pg_prove -U $PG_USER -d $PG_DATABASE -h localhost -p $PG_PORT database/tests/*.test.sql
         env:
-          PGPASSWORD: ${{ env.PG_PASSWORD }}
+          PGPASSWORD: $PG_PASSWORD
