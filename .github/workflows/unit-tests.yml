@@ -1,9 +1,11 @@
+---
 name: Run Unit Tests
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 env:
   PG_VERSION: 17.5-alpine3.22
