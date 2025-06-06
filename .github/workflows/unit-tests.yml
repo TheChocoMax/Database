@@ -7,7 +7,6 @@ on:
   workflow_dispatch:
 
 env:
-  PG_VERSION: 17.5
   PG_PORT: 5432
   PG_USER: postgres
   PG_PASSWORD: postgres
@@ -28,7 +27,9 @@ jobs:
             postgresql \
             postgresql-client \
             postgresql-server-dev-all \
-            make gcc libdbd-pg-perl libpq-dev \
+            libdbd-pg-perl \
+            make gcc \
+            libpq-dev \
             cpanminus
           sudo cpanm TAP::Parser::SourceHandler::pgTAP
 
