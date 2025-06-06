@@ -20,16 +20,21 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Install PostgreSQL and required tools
+      - name: Add PostgreSQL PGDG repo and install PostgreSQL 17
         run: |
           sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release
+          echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | \
+            sudo tee /etc/apt/sources.list.d/pgdg.list
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          sudo apt-get update
           sudo apt-get install -y \
-            postgresql \
-            postgresql-client \
-            postgresql-server-dev-all \
+            postgresql-17 \
+            postgresql-client-17 \
+            postgresql-server-dev-17 \
             libdbd-pg-perl \
-            make gcc \
             libpq-dev \
+            make gcc \
             cpanminus
           sudo cpanm TAP::Parser::SourceHandler::pgTAP
 
