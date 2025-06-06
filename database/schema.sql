@@ -1,10 +1,3 @@
--- TODO: Use environment variables for sensitive data and remove hardcoded values
-CREATE USER chocomax_admin WITH PASSWORD 'strong_password';
-GRANT ALL PRIVILEGES ON DATABASE chocomax TO chocomax_admin;
-
--- Connect to the database
-\c chocomax;
-
 -- Enums & Types
 
 CREATE TYPE delivery_type AS ENUM ('pickup', 'delivery');
