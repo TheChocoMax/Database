@@ -101,11 +101,14 @@
             "label": "Lint SQL File",
             "type": "shell",
             "command": "sqlfluff fix '${file}' -v",
+            "problemMatcher": [],
             "group": {
                 "kind": "none",
                 "isDefault": true
             },
-            "problemMatcher": [],
+            "presentation": {
+                "close": true
+            },
             "runOptions": {
                 "runOn": "default"
             }
