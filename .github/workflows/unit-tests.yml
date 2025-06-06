@@ -66,9 +66,9 @@ jobs:
 
           find flattened-sql -maxdepth 1 -name "*.sql" | while read -r file; do
             echo "➡️ Running $file..."
-            psql -h "$PGHOST" -U "$PG_USER" -d "$PG_DATABASE" -f "$file"
+            sudo -u postgres psql -d "$PG_DATABASE" -f "$file"
           done
 
       - name: Run pgTAP tests
         run: |
-          pg_prove -d $PG_DATABASE -U $PG_USER database/tests/*.test.sql
+          pg_prove -d "$PG_DATABASE" -U "$PG_USER" database/tests/*.test.sql
