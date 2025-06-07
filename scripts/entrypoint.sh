@@ -11,11 +11,6 @@ chown -R "$USERNAME":"$USERNAME" "$PGDATA" /run/postgresql
 
 # Init DB only if not initialized yet
 if [ ! -s "$PGDATA/PG_VERSION" ]; then
-    if [ -z "$PGPASS" ]; then
-        echo "❌ POSTGRES_PASSWORD is required but not set."
-        exit 1
-    fi
-
     echo "🧪 Initializing PostgreSQL data directory..."
     echo "$PGPASS" > /tmp/pwfile
     chmod 600 /tmp/pwfile
