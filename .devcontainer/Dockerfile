@@ -27,5 +27,7 @@ RUN addgroup -g $USER_GID -S $USERNAME && \
 # Set environment variables for PostgreSQL
 ENV PGDATA=/var/lib/postgresql/data
 
+WORKDIR /workspace
+
 # Switch to the default user
 USER $USERNAME

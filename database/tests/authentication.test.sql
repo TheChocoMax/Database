@@ -8,14 +8,14 @@ DELETE FROM user_authentication_methods;
 DELETE FROM users;
 
 -- Create temp table to store test user ID
-CREATE TEMP TABLE test_user (id INTEGER);
+CREATE TEMP TABLE test_user (user_id INTEGER);
 
 -- Insert test user
 INSERT INTO users (username, email_encrypted, email_hash, password_hash)
 VALUES ('demo_user', 'encrypted_email', 'email_hash_value', 'demo_pass_hash');
 
 -- Store inserted user ID into temp table
-INSERT INTO test_user (id)
+INSERT INTO test_user (user_id)
 SELECT user_id FROM users
 WHERE username = 'demo_user';
 
@@ -29,11 +29,11 @@ SELECT ok(
 SELECT is(
     (
         SELECT count(*)::INT FROM login_attempts
-        WHERE user_id = (SELECT id FROM test_user) AND success = TRUE
+        WHERE login_attempts.user_id = (SELECT test_user.user_id FROM test_user) AND login_attempts.success = TRUE
     ),
     1, 'A successful login attempt is logged'
 );
 
 -- Finish the tests and clean up.
-SELECT * FROM finish(TRUE);
+SELECT finish(TRUE);
 ROLLBACK;

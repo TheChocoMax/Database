@@ -9,5 +9,5 @@ SELECT is(1 + 1, 2, '1 + 1 equals 2');
 
 
 -- Finish the tests and clean up.
-SELECT * FROM finish(TRUE);
+SELECT finish(TRUE);
 ROLLBACK;
