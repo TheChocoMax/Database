@@ -29,7 +29,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false
           FILTER_REGEX_EXCLUDE: '(.github/pull_request_template.md|.github/ISSUE_TEMPLATE/*.md)'
-          HADOLINT_SEVERITY: error
+          DOCKERFILE_HADOLINT_FILE_NAME: .github/workflow_config/hadolintlintrc.yaml
 
   fix-lint:
     name: Fix Lint
@@ -53,4 +53,15 @@ jobs:
           FIX_SHELL_SHFMT: true
           FIX_SQLFLUFF: true
           FIX_YAML_PRETTIER: true
-          HADOLINT_SEVERITY: error
+          DOCKERFILE_HADOLINT_FILE_NAME: .github/workflow_config/hadolintlintrc.yaml
+
+      - name: Commit and push linting fixes
+        if: >
+          github.event_name == 'pull_request' &&
+          github.ref_name != github.event.repository.default_branch
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          branch: ${{ github.event.pull_request.head.ref || github.head_ref || github.ref }}
+          commit_message: 'chore: fix linting issues'
+          commit_user_name: super-linter
+          commit_user_email: super-linter@super-linter.dev
