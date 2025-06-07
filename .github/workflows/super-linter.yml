@@ -2,7 +2,7 @@
 name: Lint
 
 permissions:
-  contents: read
+  contents: write
   packages: read
   statuses: write
 
@@ -13,7 +13,7 @@ on:
   pull_request: null
 
 jobs:
-  build:
+  lint:
     name: Lint
     runs-on: ubuntu-latest
 
@@ -29,3 +29,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false
           FILTER_REGEX_EXCLUDE: '(.devcontainer/Dockerfile|.github/pull_request_template.md|.github/ISSUE_TEMPLATE/*.md)'
+
+  fix-lint:
+    name: Fix Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Super-linter
+        uses: super-linter/super-linter@v7.4.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FIX_JSON_PRETTIER: true
+          FIX_MARKDOWN_PRETTIER: true
+          FIX_SHELL_SHFMT: true
+          FIX_SQLFLUFF: true
+          FIX_YAML_PRETTIER: true
