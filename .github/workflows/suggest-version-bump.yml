@@ -1,6 +1,9 @@
 ---
 name: Suggest Version Bump
 
+permissions:
+  contents: read
+
 on:
   workflow_call:
     outputs:
