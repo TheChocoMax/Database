@@ -84,8 +84,8 @@ jobs:
         run: |
           mkdir flattened-sql
           find database -type f -name "*.sql" ! -name "*.session.sql" ! -name "*.test.sql" | while read -r file; do
-            clean_path=$(echo "$file" | sed 's|^\./||')
-            new_name=$(echo "$clean_path" | sed 's|/|_|g')
+            clean_path="${file#./}"
+            new_name="${clean_path//\//_}"
             cp "$file" "flattened-sql/$new_name"
             echo "✅ Copied: $file → flattened-sql/$new_name"
           done
