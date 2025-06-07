@@ -58,7 +58,7 @@ jobs:
           fi
 
           # Ensure the database is created
-          sudo -u "$PG_USER" createdb -O "$PG_USER" "$PG_DATABASE"
+          sudo -u "$PG_USER" createdb -p "$PGPORT" -O "$PG_USER" "$PG_DATABASE"
 
       - name: Build and install pgTAP
         run: |
