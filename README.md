@@ -18,7 +18,7 @@ To set up the database locally, you'll need Docker installed. Follow the steps b
 2. **Run the Docker Container**:
 
    ```bash
-   docker run -d -p 5432:5432 --name chocomax-database-container -e POSTGRES_PASSWORD=myrootpassword chocomax-database-image
+   docker run -d -p 5432:5432 --name chocomax-database-container --env-file .env chocomax-database-image
    ```
 
 3. **Access the Database**:
