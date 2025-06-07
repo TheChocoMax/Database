@@ -2,7 +2,11 @@ name: Run PostgreSQL Unit Tests
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+    paths:
+      - database/**
+      - .github/workflows/unit-tests.yml
   pull_request: null
   workflow_dispatch:
 
