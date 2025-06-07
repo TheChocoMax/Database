@@ -1,5 +1,5 @@
-# Build output
-flattened-sql/
+# Temporary files
+.tmp/
 
 # Database session files
 *.session.sql
