@@ -29,7 +29,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false
           FILTER_REGEX_EXCLUDE: '(.github/pull_request_template.md|.github/ISSUE_TEMPLATE/*.md)'
-          DOCKERFILE_HADOLINT_FILE_NAME: .github/workflow_config/hadolintlintrc.yaml
 
   fix-lint:
     name: Fix Lint
@@ -53,7 +52,6 @@ jobs:
           FIX_SHELL_SHFMT: true
           FIX_SQLFLUFF: true
           FIX_YAML_PRETTIER: true
-          DOCKERFILE_HADOLINT_FILE_NAME: .github/workflow_config/hadolintlintrc.yaml
 
       - name: Commit and push linting fixes
         if: >
