@@ -3,6 +3,8 @@ name: Suggest Version Bump
 
 permissions:
   contents: read
+  pull-requests: read
+  statuses: read
 
 on:
   pull_request:
