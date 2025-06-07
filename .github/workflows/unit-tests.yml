@@ -48,15 +48,18 @@ jobs:
       - name: Start PostgreSQL
         run: |
           sudo systemctl start postgresql
-          sudo -u $PG_USER createdb -O $PG_USER $PG_DATABASE
+          sudo -u "$PG_USER" createdb -O "$PG_USER" "$PG_DATABASE"
 
       - name: Build and install pgTAP
         run: |
           git clone --depth 1 https://github.com/theory/pgtap
           cd pgtap
           make
-          sudo -u $PG_USER psql -d $PG_DATABASE -f sql/pgtap.sql
-          cd .. && rm -rf pgtap
+          sudo make install  # <-- This places extension files in the right directory
+
+      - name: Create pgTAP extension in database
+        run: |
+          sudo -u "$PG_USER" psql -d "$PG_DATABASE" -c "CREATE EXTENSION IF NOT EXISTS pgtap;"
 
       - name: Flatten and load schema SQL files
         run: |
