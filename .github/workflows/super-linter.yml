@@ -45,6 +45,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FIX_JSON_PRETTIER: true
+          FIX_MARKDOWN: true
           FIX_MARKDOWN_PRETTIER: true
           FIX_SHELL_SHFMT: true
           FIX_SQLFLUFF: true
