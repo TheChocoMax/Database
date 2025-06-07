@@ -45,10 +45,18 @@ jobs:
       - name: Check PostgreSQL version
         run: psql --version
 
-      - name: Stop PostgreSQL 16 and start PostgreSQL 17.5
+      - name: Stop default PostgreSQL and start PostgreSQL 17
         run: |
           sudo systemctl stop postgresql
-          sudo pg_ctlcluster 17.5 main start
+
+          # Create the PostgreSQL 17 cluster if it doesn't exist
+          if ! sudo pg_lsclusters | grep -q '^17\s\+main'; then
+            sudo pg_createcluster 17 main --start
+          else
+            sudo pg_ctlcluster 17 main start
+          fi
+
+          # Ensure the database is created
           sudo -u "$PG_USER" createdb -O "$PG_USER" "$PG_DATABASE"
 
       - name: Build and install pgTAP
