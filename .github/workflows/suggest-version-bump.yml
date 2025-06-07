@@ -67,3 +67,9 @@ jobs:
             NEXT_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
           fi
           echo "next_version=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Report summary
+        run: |
+          echo "### 🚀 Suggested Version Bump: **${{ steps.bump.outputs.bump }}**" >> "$GITHUB_STEP_SUMMARY"
+          echo "#### Latest tag: \`${{ steps.latest_tag.outputs.tag }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "#### Next version: \`${{ steps.next_version.outputs.next_version }}\`" >> "$GITHUB_STEP_SUMMARY"
