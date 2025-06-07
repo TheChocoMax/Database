@@ -45,10 +45,10 @@ jobs:
       - name: Check PostgreSQL version
         run: psql --version
 
-      - name: Stop PostgreSQL 16 and start PostgreSQL 17
+      - name: Stop PostgreSQL 16 and start PostgreSQL 17.5
         run: |
           sudo systemctl stop postgresql
-          sudo pg_ctlcluster 17 main start
+          sudo pg_ctlcluster 17.5 main start
           sudo -u "$PG_USER" createdb -O "$PG_USER" "$PG_DATABASE"
 
       - name: Build and install pgTAP
