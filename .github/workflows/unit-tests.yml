@@ -74,7 +74,7 @@ jobs:
 
       - name: Create pgTAP extension in database
         run: |
-          sudo -u "$PG_USER" psql -d "$PG_DATABASE" -c "CREATE EXTENSION IF NOT EXISTS pgtap;"
+          sudo -u "$PG_USER" psql -p "$PGPORT" -d "$PG_DATABASE" -c "CREATE EXTENSION IF NOT EXISTS pgtap;"
 
       - name: Flatten and load schema SQL files
         run: |
@@ -88,9 +88,9 @@ jobs:
 
           find flattened-sql -maxdepth 1 -name "*.sql" | while read -r file; do
             echo "➡️ Running $file..."
-            sudo -u postgres psql -d "$PG_DATABASE" -f "$file"
+            sudo -u postgres psql -p "$PGPORT" -d "$PG_DATABASE" -f "$file"
           done
 
       - name: Run pgTAP tests
         run: |
-          sudo -u postgres pg_prove -d "$PG_DATABASE" database/tests/*.test.sql
+          sudo -u postgres pg_prove -p "$PGPORT" -d "$PG_DATABASE" database/tests/*.test.sql
