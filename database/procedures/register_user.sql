@@ -10,27 +10,37 @@ CREATE OR REPLACE PROCEDURE register_user(
 )
 LANGUAGE plpgsql AS $$
 BEGIN
-    INSERT INTO users (
-        email_encrypted,
-        email_hash,
-        username,
-        password_hash,
-        phone_encrypted,
-        phone_hash,
-        preferred_language
-    )
-    VALUES (
-        p_email_encrypted,
-        p_email_hash,
-        p_username,
-        p_password_hash,
-        p_phone_encrypted,
-        p_phone_hash,
-        p_preferred_language
-    )
-    ON CONFLICT (username) DO NOTHING;
-    IF NOT FOUND THEN
-        RAISE EXCEPTION 'Username % already exists', p_username;
-    END IF;
+    BEGIN
+        INSERT INTO users (
+            email_encrypted,
+            email_hash,
+            username,
+            password_hash,
+            phone_encrypted,
+            phone_hash,
+            preferred_language
+        )
+        VALUES (
+            p_email_encrypted,
+            p_email_hash,
+            p_username,
+            p_password_hash,
+            p_phone_encrypted,
+            p_phone_hash,
+            p_preferred_language
+        );
+    EXCEPTION
+        WHEN unique_violation THEN
+            -- Identify the constraint that caused the error
+            IF SQLERRM LIKE '%username%' THEN
+                RAISE EXCEPTION 'Username % already exists', p_username;
+            ELSIF SQLERRM LIKE '%email_hash%' THEN
+                RAISE EXCEPTION 'Email address already exists';
+            ELSIF SQLERRM LIKE '%phone_hash%' THEN
+                RAISE EXCEPTION 'Phone number already exists';
+            ELSE
+                RAISE;
+            END IF;
+    END;
 END;
 $$;

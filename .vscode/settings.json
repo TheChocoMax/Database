@@ -22,6 +22,8 @@
         }
     ],
     "triggerTaskOnSave.tasks": {
-        "Lint SQL File": ["**/*.sql"]
+        "Lint SQL File": [
+            "database/**/*.sql"
+        ]
     }
 }
