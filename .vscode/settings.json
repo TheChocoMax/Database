@@ -18,12 +18,10 @@
             "database": "chocomax",
             "username": "vscode",
             "askForPassword": false,
-            "password": "postgres",
+            "password": "postgres"
         }
     ],
     "triggerTaskOnSave.tasks": {
-        "Lint SQL File": [
-            "**/*.sql"
-        ]
+        "Lint SQL File": ["**/*.sql"]
     }
 }

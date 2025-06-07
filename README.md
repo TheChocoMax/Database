@@ -19,7 +19,7 @@ To set up the database locally, you'll need Docker installed. Follow the steps b
 
    ```bash
    docker run -d \
-      -p 5432:5432 \ 
+      -p 5432:5432 \
       --name chocomax-database-container \
       --env-file .env \
       --security-opt no-new-privileges:true \
