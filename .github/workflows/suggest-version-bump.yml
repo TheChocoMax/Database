@@ -5,6 +5,11 @@ permissions:
   contents: read
 
 on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'database/**/*.sql'
   workflow_call:
     outputs:
       next_version:
