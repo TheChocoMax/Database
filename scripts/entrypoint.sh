@@ -33,6 +33,8 @@ EOSQL
 
     echo "📂 Flattening SQL files..."
     /usr/local/bin/flatten-sql.sh
+    echo "🗑️  Cleaning up /docker-entrypoint-initdb.d/..."
+    rm -rf /docker-entrypoint-initdb.d/*
 
     echo "⏳ Starting PostgreSQL temporarily to run init-db.sh..."
     postgres -D "$PGDATA" -k /run/postgresql &
