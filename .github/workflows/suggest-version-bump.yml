@@ -1,16 +1,12 @@
 ---
 name: Suggest Version Bump
 
-permissions:
-  contents: read
-  pull-requests: read
-
 on:
-  pull_request:
-    branches:
-      - 'main'
-    paths:
-      - 'database/**/*'
+  workflow_call:
+    outputs:
+      next_version:
+        description: 'The next suggested version'
+        value: ${{ jobs.suggest-bump.outputs.next_version }}
 
 jobs:
   get-labels:
@@ -20,6 +16,8 @@ jobs:
     name: Suggest Version Bump
     needs: get-labels
     runs-on: ubuntu-latest
+    outputs:
+      next_version: ${{ steps.next_version.outputs.next_version }}
     steps:
       - name: Determine bump type
         id: bump
@@ -31,6 +29,31 @@ jobs:
           echo "$LABELS" | grep -q 'type: breaking' && BUMP="major"
           echo "bump=$BUMP" >> "$GITHUB_OUTPUT"
 
-      - name: Report summary
+      - name: Get latest tag
+        id: latest_tag
         run: |
-          echo "### 🚀 Suggested Version Bump: **${{ steps.bump.outputs.bump }}**" >> "$GITHUB_STEP_SUMMARY"
+          TAG=$(git tag --list 'v*' --sort=-v:refname | head -n1)
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Calculate next version
+        id: next_version
+        run: |
+          TAG="${{ steps.latest_tag.outputs.tag }}"
+          BUMP="${{ steps.bump.outputs.bump }}"
+          if [ -z "$TAG" ]; then
+            TAG="v0.0.0"
+          fi
+          VERSION=$(echo "$TAG" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+          PRERELEASE=$(echo "$TAG" | sed -nE 's/^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$/\1/p')
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          case "$BUMP" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+          esac
+          if [ -n "$PRERELEASE" ]; then
+            NEXT_VERSION="v${MAJOR}.${MINOR}.${PATCH}${PRERELEASE}"
+          else
+            NEXT_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          fi
+          echo "next_version=$NEXT_VERSION" >> "$GITHUB_OUTPUT"
