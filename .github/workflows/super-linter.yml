@@ -28,7 +28,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false
-          FILTER_REGEX_EXCLUDE: '(.devcontainer/Dockerfile|.github/pull_request_template.md|.github/ISSUE_TEMPLATE/*.md)'
+          FILTER_REGEX_EXCLUDE: '(.github/pull_request_template.md|.github/ISSUE_TEMPLATE/*.md)'
 
   fix-lint:
     name: Fix Lint
@@ -43,6 +43,8 @@ jobs:
       - name: Super-linter
         uses: super-linter/super-linter@v7.4.0
         env:
+          VALIDATE_ALL_CODEBASE: false
+          FILTER_REGEX_EXCLUDE: '(.github/pull_request_template.md|.github/ISSUE_TEMPLATE/*.md)'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FIX_JSON_PRETTIER: true
           FIX_MARKDOWN: true
