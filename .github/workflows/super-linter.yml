@@ -24,11 +24,12 @@ jobs:
           fetch-depth: 0
 
       - name: Super-linter
-        uses: super-linter/super-linter@v7
+        uses: super-linter/super-linter/slim@v7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_ALL_CODEBASE: false
           FILTER_REGEX_EXCLUDE: '(.github/pull_request_template.md|.github/ISSUE_TEMPLATE/*.md)'
+          HADOLINT_SEVERITY: error
 
   fix-lint:
     name: Fix Lint
@@ -41,7 +42,7 @@ jobs:
           fetch-depth: 0
 
       - name: Super-linter
-        uses: super-linter/super-linter@v7.4.0
+        uses: super-linter/super-linter/slim@v7.4.0
         env:
           VALIDATE_ALL_CODEBASE: false
           FILTER_REGEX_EXCLUDE: '(.github/pull_request_template.md|.github/ISSUE_TEMPLATE/*.md)'
@@ -52,3 +53,4 @@ jobs:
           FIX_SHELL_SHFMT: true
           FIX_SQLFLUFF: true
           FIX_YAML_PRETTIER: true
+          HADOLINT_SEVERITY: error
