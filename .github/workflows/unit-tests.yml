@@ -40,9 +40,6 @@ jobs:
             libpq-dev \
             make gcc \
             cpanminus
-          export PATH="/usr/lib/postgresql/17/bin:$PATH"
-          make PG_CONFIG=/usr/lib/postgresql/17/bin/pg_config
-          sudo make install PG_CONFIG=/usr/lib/postgresql/17/bin/pg_config
           sudo cpanm TAP::Parser::SourceHandler::pgTAP
 
       - name: Check PostgreSQL version
@@ -57,8 +54,13 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/theory/pgtap
           cd pgtap
-          make
-          sudo make install  # <-- This places extension files in the right directory
+          export PG_CONFIG=/usr/lib/postgresql/17/bin/pg_config
+          make PG_CONFIG=$PG_CONFIG
+          sudo make install PG_CONFIG=$PG_CONFIG
+
+      - name: Confirm pgTAP extension is in PostgreSQL 17 directory
+        run: |
+          ls -l /usr/share/postgresql/17/extension/pgtap.control
 
       - name: Create pgTAP extension in database
         run: |
