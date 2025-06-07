@@ -7,9 +7,16 @@ RUN apk add --no-cache bash git \
     build-base perl-dev openssl-dev python3 py3-pip \
     && cpan TAP::Parser::SourceHandler::pgTAP
 
-# Build and install pgTAP from source
-RUN git clone --depth 1 https://github.com/theory/pgtap && \
-    cd pgtap && make && make install && cd .. && rm -rf pgtap
+# Clone pgTAP
+RUN git clone --depth 1 https://github.com/theory/pgtap
+
+# Build and install pgTAP
+WORKDIR /pgtap
+RUN make && make install
+
+# Cleanup
+WORKDIR /
+RUN rm -rf /pgtap
 
 # Install sqlfluff for SQL linting
 RUN ["/bin/bash", "-c", "pip3 --disable-pip-version-check --no-cache-dir install sqlfluff --break-system-packages"]
