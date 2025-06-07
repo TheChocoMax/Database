@@ -1,5 +1,7 @@
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
+BEGIN;
+
 SELECT plan(2);
 
 -- Clean environment
@@ -34,6 +36,6 @@ SELECT is(
     1, 'A successful login attempt is logged'
 );
 
--- Finish the tests and clean up.
 SELECT finish(TRUE);
+
 ROLLBACK;
