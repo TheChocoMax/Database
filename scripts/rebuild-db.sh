@@ -4,6 +4,7 @@ set -e
 DB_USER="$1"
 DB_NAME="$2"
 DB_PASS="${POSTGRES_PASSWORD}"
+FLATTENED_SQL_DIR="${FLATTEN_SQL_DIR:-/tmp/flattened-sql}"
 
 if [ -z "$DB_PASS" ]; then
     echo "❌ POSTGRES_PASSWORD is not set"
@@ -18,10 +19,10 @@ dropdb -h /run/postgresql -U "$DB_USER" "$DB_NAME" || true
 createdb -h /run/postgresql -U "$DB_USER" "$DB_NAME"
 
 # Execute all flattened SQL files (excluding nested ones)
-find flattened-sql -maxdepth 1 -name "*.sql" | while read -r file; do
+find "$FLATTENED_SQL_DIR" -maxdepth 1 -name "*.sql" | while read -r file; do
     echo "📄 Running $file..."
     psql -h /run/postgresql -U "$DB_USER" -d "$DB_NAME" -f "$file"
 done
 
 # Cleanup
-rm -rf flattened-sql
+rm -rf "$FLATTENED_SQL_DIR"

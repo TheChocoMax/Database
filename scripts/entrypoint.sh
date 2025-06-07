@@ -21,21 +21,21 @@ if [ ! -s "$PGDATA/PG_VERSION" ]; then
     chmod 600 /tmp/pwfile
     chown "$USERNAME":"$USERNAME" /tmp/pwfile
 
-    su-exec "$USERNAME" initdb -D "$PGDATA" --auth=scram-sha-256 --username="$PGUSER" --pwfile=/tmp/pwfile
+    initdb -D "$PGDATA" --auth=scram-sha-256 --username="$PGUSER" --pwfile=/tmp/pwfile
     rm /tmp/pwfile
 
     if [ "$PGDB" != "postgres" ]; then
         echo "🛠️  Creating database '$PGDB'..."
-        su-exec "$USERNAME" postgres --single -jE -D "$PGDATA" -k /run/postgresql <<-EOSQL
+        postgres --single -jE -D "$PGDATA" -k /run/postgresql <<-EOSQL
             CREATE DATABASE "$PGDB" OWNER "$PGUSER";
 EOSQL
     fi
 
     echo "📂 Flattening SQL files..."
-    /usr/local/bin/flatten-sql.sh /docker-entrypoint-initdb.d /flattened-sql
+    /usr/local/bin/flatten-sql.sh
 
     echo "⏳ Starting PostgreSQL temporarily to run init-db.sh..."
-    su-exec "$USERNAME" postgres -D "$PGDATA" -k /run/postgresql &
+    postgres -D "$PGDATA" -k /run/postgresql &
     PG_PID=$!
 
     # Wait until PostgreSQL is ready
@@ -53,4 +53,4 @@ EOSQL
 fi
 
 echo "🚀 Starting PostgreSQL..."
-exec su-exec "$USERNAME" postgres -D "$PGDATA" -k /run/postgresql
+postgres -D "$PGDATA" -k /run/postgresql
