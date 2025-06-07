@@ -40,6 +40,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Debug GitHub Context
+        run: |
+          echo "event_name: ${{ github.event_name }}"
+          echo "ref: ${{ github.ref }}"
+          echo "ref_name: ${{ github.ref_name }}"
+          echo "head_ref: ${{ github.head_ref }}"
+          echo "pull_request.head.ref: ${{ github.event.pull_request.head.ref }}"
+
       - name: Super-linter
         uses: super-linter/super-linter/slim@v7.4.0
         env:
@@ -52,14 +60,6 @@ jobs:
           FIX_SHELL_SHFMT: true
           FIX_SQLFLUFF: true
           FIX_YAML_PRETTIER: true
-
-      - name: Debug GitHub Context
-        run: |
-          echo "event_name: ${{ github.event_name }}"
-          echo "ref: ${{ github.ref }}"
-          echo "ref_name: ${{ github.ref_name }}"
-          echo "head_ref: ${{ github.head_ref }}"
-          echo "pull_request.head.ref: ${{ github.event.pull_request.head.ref }}"
 
       - name: Commit and push linting fixes
         if: >
