@@ -16,7 +16,8 @@ VALUES ('demo_user', 'encrypted_email', 'email_hash_value', 'demo_pass_hash');
 
 -- Store inserted user ID into temp table
 INSERT INTO test_user (id)
-SELECT user_id FROM users WHERE username = 'demo_user';
+SELECT user_id FROM users
+WHERE username = 'demo_user';
 
 -- Test 1: authenticate_user returns true on correct credentials
 SELECT ok(
@@ -26,10 +27,13 @@ SELECT ok(
 
 -- Test 2: A successful login attempt is recorded for that user
 SELECT is(
-    (SELECT COUNT(*)::INT FROM login_attempts WHERE user_id = (SELECT id FROM test_user) AND success = TRUE),
+    (
+        SELECT count(*)::INT FROM login_attempts
+        WHERE user_id = (SELECT id FROM test_user) AND success = TRUE
+    ),
     1, 'A successful login attempt is logged'
 );
 
 -- Finish the tests and clean up.
-SELECT * FROM finish(true);
+SELECT * FROM finish(TRUE);
 ROLLBACK;
