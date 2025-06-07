@@ -3,8 +3,11 @@
 set -e
 
 # Default directories
-SRC_DIR="${1:-/docker-entrypoint-initdb.d}"
-DEST_DIR="${2:-${FLATTEN_SQL_DIR:-/tmp/flattened-sql}}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+SRC_DIR="${1:-$PROJECT_ROOT/database}"
+DEST_DIR="${2:-${FLATTEN_SQL_DIR:-$PROJECT_ROOT/.tmp/flattened-sql}}"
 
 echo "📦 Flattening SQL files from '$SRC_DIR' to '$DEST_DIR'..."
 

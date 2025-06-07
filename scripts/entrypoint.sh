@@ -32,7 +32,7 @@ EOSQL
     fi
 
     echo "📂 Flattening SQL files..."
-    /usr/local/bin/flatten-sql.sh
+    /usr/local/bin/flatten-sql.sh /docker-entrypoint-initdb.d /tmp/flattened-sql
     echo "🗑️  Cleaning up /docker-entrypoint-initdb.d/..."
     rm -rf /docker-entrypoint-initdb.d/*
 

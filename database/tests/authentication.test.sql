@@ -4,7 +4,7 @@ SELECT plan(2);
 
 -- Clean environment
 DELETE FROM login_attempts;
-DELETE FROM user_2fa;
+DELETE FROM user_authentication_methods;
 DELETE FROM users;
 
 -- Create temp table to store test user ID
@@ -16,7 +16,7 @@ VALUES ('demo_user', 'encrypted_email', 'email_hash_value', 'demo_pass_hash');
 
 -- Store inserted user ID into temp table
 INSERT INTO test_user (id)
-SELECT id FROM users WHERE username = 'demo_user';
+SELECT user_id FROM users WHERE username = 'demo_user';
 
 -- Test 1: authenticate_user returns true on correct credentials
 SELECT ok(

@@ -127,5 +127,11 @@
             "description": "Enter the database name",
             "default": "chocomax"
         }
-    ]
+    ],
+    "options": {
+        "env": {
+            "FLATTEN_SQL_DIR": "${workspaceFolder}/.tmp/flattened-sql"
+        },
+        "cwd": "${workspaceFolder}"
+    }
 }

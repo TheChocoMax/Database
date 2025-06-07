@@ -1,15 +1,13 @@
 #!/bin/sh
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
 DB_USER="$1"
 DB_NAME="$2"
 DB_PASS="${POSTGRES_PASSWORD}"
-FLATTENED_SQL_DIR="${FLATTEN_SQL_DIR:-/tmp/flattened-sql}"
-
-if [ -z "$DB_PASS" ]; then
-    echo "❌ POSTGRES_PASSWORD is not set"
-    exit 1
-fi
+FLATTENED_SQL_DIR="${FLATTEN_SQL_DIR:-$PROJECT_ROOT/.tmp/flattened-sql}"
 
 export PGPASSWORD="$DB_PASS"
 
