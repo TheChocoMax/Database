@@ -1,0 +1,100 @@
+---
+name: Run PostgreSQL Unit Tests
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - database/**
+      - .github/workflows/unit-tests.yml
+  pull_request: null
+  workflow_dispatch:
+
+env:
+  PG_USER: postgres
+  PG_DATABASE: chocomax
+  PGHOST: /var/run/postgresql
+  PGPORT: 5433
+
+jobs:
+  unit-tests:
+    name: Run PostgreSQL Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Add PostgreSQL PGDG repo and install PostgreSQL 17
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg lsb-release
+          echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" | \
+            sudo tee /etc/apt/sources.list.d/pgdg.list
+          wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+          sudo apt-get update
+          sudo apt-get install -y \
+            postgresql-17 \
+            postgresql-client-17 \
+            postgresql-server-dev-17 \
+            libdbd-pg-perl \
+            libpq-dev \
+            make gcc \
+            cpanminus
+          sudo cpanm TAP::Parser::SourceHandler::pgTAP
+
+      - name: Check PostgreSQL version
+        run: psql --version
+
+      - name: Stop default PostgreSQL and start PostgreSQL 17
+        run: |
+          sudo systemctl stop postgresql
+
+          # Create the PostgreSQL 17 cluster if it doesn't exist
+          if ! sudo pg_lsclusters | grep -q '^17\s\+main'; then
+            sudo pg_createcluster 17 main --start
+          else
+            sudo pg_ctlcluster 17 main start
+          fi
+
+          # Ensure the database is created
+          sudo -u "$PG_USER" createdb -p "$PGPORT" -O "$PG_USER" "$PG_DATABASE"
+
+      - name: Build and install pgTAP
+        run: |
+          git clone --depth 1 https://github.com/theory/pgtap
+          cd pgtap
+          export PG_CONFIG=/usr/lib/postgresql/17/bin/pg_config
+          make PG_CONFIG=$PG_CONFIG
+          sudo make install PG_CONFIG=$PG_CONFIG
+
+      - name: Confirm pgTAP extension is in PostgreSQL 17 directory
+        run: |
+          ls -l /usr/share/postgresql/17/extension/pgtap.control
+
+      - name: Create pgTAP extension in database
+        run: |
+          sudo -u "$PG_USER" psql -p "$PGPORT" -d "$PG_DATABASE" -c "CREATE EXTENSION IF NOT EXISTS pgtap;"
+
+      - name: Flatten and load schema SQL files
+        run: |
+          mkdir flattened-sql
+          find database -type f -name "*.sql" ! -name "*.session.sql" ! -name "*.test.sql" | while read -r file; do
+            clean_path="${file#./}"
+            new_name="${clean_path//\//_}"
+            cp "$file" "flattened-sql/$new_name"
+            echo "✅ Copied: $file → flattened-sql/$new_name"
+          done
+
+          find flattened-sql -maxdepth 1 -name "*.sql" | while read -r file; do
+            echo "➡️ Running $file..."
+            sudo -u postgres psql -p "$PGPORT" -d "$PG_DATABASE" -f "$file"
+          done
+
+      - name: Run pgTAP tests
+        run: |
+          sudo -u postgres pg_prove -p "$PGPORT" -d "$PG_DATABASE" database/tests/*.test.sql

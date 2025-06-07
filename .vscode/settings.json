@@ -5,8 +5,23 @@
     "editor.tabSize": 4,
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
-    "files.trimTrailingWhitespace": false,
+    "files.trimTrailingWhitespace": true,
     "[yaml]": {
         "editor.tabSize": 2
+    },
+    "sqltools.connections": [
+        {
+            "name": "ChocoMax",
+            "server": "localhost",
+            "driver": "PostgreSQL",
+            "port": 5432,
+            "database": "chocomax",
+            "username": "vscode",
+            "askForPassword": false,
+            "password": "postgres"
+        }
+    ],
+    "triggerTaskOnSave.tasks": {
+        "Lint SQL File": ["**/*.sql"]
     }
 }

@@ -1,0 +1,42 @@
+---
+name: Release Docker Image
+
+permissions:
+  packages: write
+  contents: read
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version
+        id: version
+        run: |
+          RAW_TAG=${GITHUB_REF#refs/tags/}
+          VERSION=$(echo "$RAW_TAG" | sed -E 's/^v?([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
+          echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Docker login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Normalize image name (lowercase)
+        run: |
+          echo "REPO_LOWER=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE="ghcr.io/${REPO_LOWER}:${{ steps.version.outputs.tag }}"
+          echo "🔨 Building image: $IMAGE"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"

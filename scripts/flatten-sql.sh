@@ -3,18 +3,20 @@
 set -e
 
 # Default directories
-SRC_DIR="${1:-.}"
-DEST_DIR="${2:-flattened-sql}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+SRC_DIR="${1:-$PROJECT_ROOT/database}"
+DEST_DIR="${2:-${FLATTEN_SQL_DIR:-$PROJECT_ROOT/.tmp/flattened-sql}}"
 
 echo "📦 Flattening SQL files from '$SRC_DIR' to '$DEST_DIR'..."
 
+rm -rf "$DEST_DIR"
 mkdir -p "$DEST_DIR"
 
-find "$SRC_DIR" -type f -name "*.sql" | while read -r file; do
-    # Remove leading './' from the file path
-    clean_path=$(echo "$file" | sed 's|^\./||')
-    # Flatten the path by replacing '/' with '_'
-    new_name=$(echo "$clean_path" | sed 's|/|_|g')
-    cp "$file" "$DEST_DIR/$new_name"
-    echo "✅ Copied: $file → $DEST_DIR/$new_name"
+find "$SRC_DIR" -type f -name "*.sql" ! -name "*.session.sql" ! -name "*.test.sql" | while read -r file; do
+	rel_path="${file#"$SRC_DIR"/}"
+	new_name=$(echo "$rel_path" | sed 's|/|_|g')
+	cp "$file" "$DEST_DIR/$new_name"
+	echo "✅ Copied: $file → $DEST_DIR/$new_name"
 done

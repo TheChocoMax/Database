@@ -2,6 +2,50 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Start Database",
+            "type": "shell",
+            "command": "[ -S /run/postgresql/.s.PGSQL.5432 ] || pg_ctl -D $PGDATA -o '-k /run/postgresql' -l /tmp/pg.log start",
+            "problemMatcher": [],
+            "isBackground": false,
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "Flatten SQL Files",
+            "type": "shell",
+            "command": "./scripts/flatten-sql.sh",
+            "dependsOn": ["Start Database"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Rebuild Database",
+            "type": "shell",
+            "command": "./scripts/rebuild-db.sh",
+            "args": ["${input:db_username}", "${input:db_name}"],
+            "dependsOn": ["Flatten SQL Files"],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Stop Database",
+            "type": "shell",
+            "command": "pg_ctl -D $PGDATA stop || true",
+            "problemMatcher": []
+        },
+        {
             "label": "Connect to Database",
             "type": "shell",
             "command": "psql -h /run/postgresql -U ${input:db_username} -d ${input:db_name}",
@@ -20,28 +64,45 @@
             }
         },
         {
-            "label": "Flatten SQL Files",
-            "type": "shell",
-            "command": "./scripts/flatten-sql.sh",
+            "label": "Full Database Rebuild",
+            "dependsOn": [
+                "Start Database",
+                "Flatten SQL Files",
+                "Rebuild Database"
+            ],
+            "dependsOrder": "sequence",
             "problemMatcher": [],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            }
-        },
-        {
-            "label": "Rebuild Database",
-            "type": "shell",
-            "command": "./scripts/rebuild-db.sh",
-            "args": ["${input:db_username}", "${input:db_name}"],
-            "dependsOn": ["Flatten SQL Files"],
             "group": {
                 "kind": "build",
                 "isDefault": true
+            }
+        },
+        {
+            "label": "Run Unit Tests",
+            "type": "shell",
+            "command": "pg_prove -Q -d ${input:db_name} -U ${input:db_username} database/tests/*.test.sql",
+            "dependsOn": ["Full Database Rebuild"],
+            "problemMatcher": [],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Lint SQL File",
+            "type": "shell",
+            "command": "sqlfluff fix '${file}' -v",
+            "problemMatcher": [],
+            "group": {
+                "kind": "none",
+                "isDefault": true
             },
-            "options": {
-                "cwd": "${workspaceFolder}"
+            "presentation": {
+                "close": true
             },
-            "problemMatcher": []
+            "runOptions": {
+                "runOn": "default"
+            }
         }
     ],
     "inputs": [
@@ -55,7 +116,13 @@
             "id": "db_name",
             "type": "promptString",
             "description": "Enter the database name",
-            "default": "postgres"
+            "default": "chocomax"
         }
-    ]
+    ],
+    "options": {
+        "env": {
+            "FLATTEN_SQL_DIR": "${workspaceFolder}/.tmp/flattened-sql"
+        },
+        "cwd": "${workspaceFolder}"
+    }
 }
