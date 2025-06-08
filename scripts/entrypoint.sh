@@ -53,10 +53,10 @@ echo "🚀 Starting PostgreSQL..."
 
 # Copy custom configs if they exist
 if [ -f /etc/postgresql/postgresql.conf ]; then
-    cp /etc/postgresql/postgresql.conf "$PGDATA/postgresql.conf"
+	cp /etc/postgresql/postgresql.conf "$PGDATA/postgresql.conf"
 fi
 if [ -f /etc/postgresql/pg_hba.conf ]; then
-    cp /etc/postgresql/pg_hba.conf "$PGDATA/pg_hba.conf"
+	cp /etc/postgresql/pg_hba.conf "$PGDATA/pg_hba.conf"
 fi
 
 postgres -D "$PGDATA" -k /run/postgresql
