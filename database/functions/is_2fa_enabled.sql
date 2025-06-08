@@ -1,5 +1,5 @@
 -- Check if the user has 2FA enabled
-CREATE OR REPLACE FUNCTION is_2fa_enabled(p_user_id INTEGER) RETURNS BOOLEAN AS $$
+CREATE OR REPLACE FUNCTION is_2fa_enabled(p_user_id UUID) RETURNS BOOLEAN AS $$
 DECLARE
     v_enabled BOOLEAN;
 BEGIN

@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION authenticate_user(
     p_user_agent TEXT
 ) RETURNS BOOLEAN AS $$
 DECLARE
-    v_user_id INTEGER;
+    v_user_id UUID;
 BEGIN
     -- Attempt to find the user by username and hashed password
     SELECT user_id INTO v_user_id
