@@ -29,6 +29,9 @@ RUN chmod +x /usr/local/bin/*.sh && \
 # Drop root privileges
 USER postgres
 
+# Copy configuration files
+COPY config/. /etc/postgresql/
+
 # Use tini for proper signal handling
 ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/entrypoint.sh"]
 

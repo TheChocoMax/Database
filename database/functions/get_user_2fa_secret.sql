@@ -1,5 +1,5 @@
 -- Get the user's authentication methods secret
-CREATE OR REPLACE FUNCTION get_user_authentication_method_secret(p_user_id INTEGER) RETURNS TABLE (method TEXT, secret TEXT) AS $$
+CREATE OR REPLACE FUNCTION get_user_authentication_method_secret(p_user_id UUID) RETURNS TABLE (method TEXT, secret TEXT) AS $$
 BEGIN
     RETURN QUERY
     SELECT authentication_method, user_authentication_method_secret

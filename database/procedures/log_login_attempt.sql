@@ -1,6 +1,6 @@
 -- Log a login attempt (used in both success and failure cases)
 CREATE OR REPLACE PROCEDURE log_login_attempt(
-    p_user_id INTEGER,
+    p_user_id UUID,
     p_ip_address INET,
     p_user_agent TEXT,
     p_success BOOLEAN

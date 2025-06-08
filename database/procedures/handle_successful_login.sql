@@ -1,6 +1,6 @@
 -- Update last_login and log successful attempt
 CREATE OR REPLACE PROCEDURE handle_successful_login(
-    p_user_id INTEGER,
+    p_user_id UUID,
     p_ip_address INET,
     p_user_agent TEXT
 )

@@ -25,5 +25,6 @@
         "onAutoForward": "ignore"
     },
     "postCreateCommand": "initdb -D $PGDATA && pg_ctl -D $PGDATA -o '-k /run/postgresql' -l /tmp/pg.log start && createdb chocomax && pg_ctl -D $PGDATA stop",
+    "postStartCommand": "pg_ctl -D $PGDATA -o '-k /run/postgresql' -l /tmp/pg.log start",
     "remoteUser": "vscode"
 }

@@ -10,7 +10,7 @@ DELETE FROM user_authentication_methods;
 DELETE FROM users;
 
 -- Create temp table to store test user ID
-CREATE TEMP TABLE test_user (user_id INTEGER);
+CREATE TEMP TABLE test_user (user_id UUID);
 
 -- Insert test user
 INSERT INTO users (username, email_encrypted, email_hash, password_hash)
