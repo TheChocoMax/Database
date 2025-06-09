@@ -1,7 +1,7 @@
 -- Authenticate a user and log the result
 CREATE OR REPLACE FUNCTION authenticate_user(
-    p_username VARCHAR,
-    p_password_hash VARCHAR,
+    p_username TEXT,
+    p_password_hash TEXT,
     p_ip_address INET,
     p_user_agent TEXT
 ) RETURNS BOOLEAN AS $$

@@ -1,9 +1,9 @@
 -- Register a new user
 CREATE OR REPLACE PROCEDURE register_user(
-    p_username VARCHAR,
+    p_username TEXT,
     p_email_encrypted TEXT,
     p_email_hash TEXT,
-    p_password_hash VARCHAR,
+    p_password_hash TEXT,
     p_phone_encrypted TEXT,
     p_phone_hash TEXT,
     p_preferred_language_iso_code CHAR(2)
