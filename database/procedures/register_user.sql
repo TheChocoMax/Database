@@ -6,7 +6,7 @@ CREATE OR REPLACE PROCEDURE register_user(
     p_password_hash TEXT,
     p_phone_encrypted TEXT,
     p_phone_hash TEXT,
-    p_preferred_language_iso_code CHAR(2)
+    p_language_id INTEGER
 )
 LANGUAGE plpgsql AS $$
 BEGIN
@@ -27,7 +27,7 @@ BEGIN
             p_password_hash,
             p_phone_encrypted,
             p_phone_hash,
-            (SELECT language_id FROM languages WHERE iso_code = p_preferred_language_iso_code)
+            p_language_id
         );
     EXCEPTION
         WHEN unique_violation THEN
