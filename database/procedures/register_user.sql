@@ -1,8 +1,8 @@
 -- Register a new user
 CREATE OR REPLACE PROCEDURE register_user(
+    p_username VARCHAR,
     p_email_encrypted TEXT,
     p_email_hash TEXT,
-    p_username VARCHAR,
     p_password_hash VARCHAR,
     p_phone_encrypted TEXT,
     p_phone_hash TEXT,
@@ -12,9 +12,9 @@ LANGUAGE plpgsql AS $$
 BEGIN
     BEGIN
         INSERT INTO users (
+            username,
             email_encrypted,
             email_hash,
-            username,
             password_hash,
             phone_encrypted,
             phone_hash,
