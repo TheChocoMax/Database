@@ -21,9 +21,9 @@ BEGIN
             language_id
         )
         VALUES (
+            p_username,
             p_email_encrypted,
             p_email_hash,
-            p_username,
             p_password_hash,
             p_phone_encrypted,
             p_phone_hash,
