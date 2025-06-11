@@ -46,7 +46,8 @@ CREATE TABLE languages (
 
 CREATE TABLE users (
     user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    username TEXT UNIQUE NOT NULL CHECK (username ~ '^[a-zA-Z0-9_]+$'), -- username must be alphanumeric and can include underscores
+    username TEXT NOT NULL CHECK (username ~ '^[a-zA-Z0-9_]+$'), -- username must be alphanumeric and can include underscores
+    discriminator SMALLINT NOT NULL CHECK (discriminator >= 0 AND discriminator <= 9999), -- 4-digit tag
     email_encrypted TEXT NOT NULL CHECK (email_encrypted <> ''), -- Encrypted email must not be empty
     email_hash TEXT UNIQUE NOT NULL CHECK (email_hash ~ '^[a-f0-9]{64}$'), -- SHA-256 hash of email
     is_email_verified BOOLEAN DEFAULT FALSE,
@@ -54,10 +55,20 @@ CREATE TABLE users (
     phone_encrypted TEXT CHECK (phone_encrypted IS NULL OR phone_encrypted <> ''), -- Encrypted phone can be NULL or cannot be empty
     phone_hash TEXT UNIQUE CHECK (phone_hash ~ '^[a-f0-9]{64}$'), -- SHA-256 hash of phone
     language_id INTEGER REFERENCES languages (language_id) ON DELETE SET NULL,
+    display_role TEXT, -- For badges/icons like "owner", "verified seller", etc.
     created_at TIMESTAMPTZ DEFAULT current_timestamp,
     updated_at TIMESTAMPTZ DEFAULT current_timestamp,
     last_login_at TIMESTAMPTZ CHECK (last_login_at <= current_timestamp),
-    deleted_at TIMESTAMPTZ CHECK (deleted_at <= current_timestamp)
+    deleted_at TIMESTAMPTZ CHECK (deleted_at <= current_timestamp),
+    UNIQUE (username, discriminator)
+);
+
+CREATE TABLE pending_users (
+    pending_user_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    email_encrypted TEXT NOT NULL CHECK (email_encrypted <> ''), -- Encrypted email must not be empty
+    email_hash TEXT NOT NULL CHECK (email_hash ~ '^[a-f0-9]{64}$'), -- SHA-256 hash of email
+    verification_token TEXT NOT NULL UNIQUE CHECK (verification_token ~ '^[a-zA-Z0-9]{32}$'), -- 32-character alphanumeric token
+    created_at TIMESTAMPTZ DEFAULT current_timestamp
 );
 
 CREATE TABLE user_permissions (

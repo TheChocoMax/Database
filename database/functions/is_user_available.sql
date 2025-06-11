@@ -1,15 +1,8 @@
-CREATE OR REPLACE FUNCTION is_user_available(
-    p_username TEXT,
-    p_email_hash TEXT,
-    p_phone_hash TEXT
+CREATE OR REPLACE FUNCTION is_email_available(
+    p_email_hash TEXT
 )
 RETURNS BOOLEAN AS $$
-BEGIN
-    RETURN NOT EXISTS (
-        SELECT 1 FROM users
-        WHERE username = p_username
-           OR email_hash = p_email_hash
-           OR phone_hash = p_phone_hash
+    SELECT NOT EXISTS (
+        SELECT 1 FROM users WHERE email_hash = p_email_hash
     );
-END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE sql;
