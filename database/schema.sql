@@ -50,7 +50,7 @@ CREATE TABLE users (
     email_encrypted TEXT NOT NULL CHECK (email_encrypted <> ''), -- Encrypted email must not be empty
     email_hash TEXT UNIQUE NOT NULL CHECK (email_hash ~ '^[a-f0-9]{64}$'), -- SHA-256 hash of email
     is_email_verified BOOLEAN DEFAULT FALSE,
-    password_hash TEXT NOT NULL CHECK (password_hash ~ '^[a-f0-9]{64}$'), -- SHA-256 hash of password
+    password_hash TEXT NOT NULL CHECK (password_hash ~ '^\$argon2id\$v=\d+\$m=\d+,t=\d+,p=\d+\$[a-zA-Z0-9+\/=]+\$[a-zA-Z0-9+\/=]+$'), -- Argon2id hash format
     phone_encrypted TEXT CHECK (phone_encrypted IS NULL OR phone_encrypted <> ''), -- Encrypted phone can be NULL or cannot be empty
     phone_hash TEXT UNIQUE CHECK (phone_hash ~ '^[a-f0-9]{64}$'), -- SHA-256 hash of phone
     language_id INTEGER REFERENCES languages (language_id) ON DELETE SET NULL,
