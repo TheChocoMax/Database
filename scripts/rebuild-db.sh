@@ -17,9 +17,9 @@ dropdb -h /run/postgresql -U "$DB_USER" "$DB_NAME" || true
 createdb -h /run/postgresql -U "$DB_USER" "$DB_NAME"
 
 # Execute all flattened SQL files (excluding nested ones)
-find "$FLATTENED_SQL_DIR" -maxdepth 1 -name "*.sql" | while read -r file; do
-	echo "📄 Running $file..."
-	psql -h /run/postgresql -U "$DB_USER" -d "$DB_NAME" -f "$file"
+find "$FLATTENED_SQL_DIR" -maxdepth 1 -name "*.sql" | sort | while read -r file; do
+    echo "📄 Running $file..."
+    psql -h /run/postgresql -U "$DB_USER" -d "$DB_NAME" -f "$file"
 done
 
 # Cleanup
