@@ -3,7 +3,7 @@ CREATE OR REPLACE FUNCTION get_user_2fa_methods_by_email_hash(
     p_email_hash TEXT
 )
 RETURNS TABLE (
-    authentication_method authentication_method,
+    authentication_method AUTHENTICATION_METHOD,
     is_preferred BOOLEAN
 ) AS $$
     SELECT authentication_method, is_preferred

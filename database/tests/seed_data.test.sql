@@ -7,7 +7,8 @@ SELECT plan(3);
 SELECT is(
     (
         SELECT count(*)::INT FROM languages
-        WHERE iso_code = 'fr'
+        WHERE
+            iso_code = 'fr'
             AND english_name = 'French'
             AND native_name = 'Français'
     ),
@@ -17,7 +18,8 @@ SELECT is(
 SELECT is(
     (
         SELECT count(*)::INT FROM languages
-        WHERE iso_code = 'en'
+        WHERE
+            iso_code = 'en'
             AND english_name = 'English'
             AND native_name = 'English'
     ),
@@ -27,7 +29,8 @@ SELECT is(
 SELECT is(
     (
         SELECT count(*)::INT FROM languages
-        WHERE iso_code = 'es'
+        WHERE
+            iso_code = 'es'
             AND english_name = 'Spanish'
             AND native_name = 'Español'
     ),

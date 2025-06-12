@@ -113,7 +113,7 @@ CREATE TABLE user_authentication_methods (
     user_id UUID NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
     user_authentication_method_secret TEXT NOT NULL, -- Base32 encoded secret for TOTP or HOTP
     is_enabled BOOLEAN DEFAULT FALSE,
-    authentication_method authentication_method DEFAULT 'TOTP', -- Default to TOTP
+    authentication_method AUTHENTICATION_METHOD DEFAULT 'TOTP', -- Default to TOTP
     is_preferred BOOLEAN DEFAULT FALSE, -- Whether this is the preferred method for 2FA
     created_at TIMESTAMPTZ DEFAULT current_timestamp,
     updated_at TIMESTAMPTZ CHECK (updated_at <= current_timestamp)
