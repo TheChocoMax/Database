@@ -1,32 +1,41 @@
--- Register a new user
+-- Register a new user using a verified pending_user's token
 CREATE OR REPLACE PROCEDURE register_user(
+    p_verification_token TEXT,
     p_username TEXT,
-    p_email_encrypted TEXT,
-    p_email_hash TEXT,
+    p_discriminator SMALLINT,
     p_password_hash TEXT,
-    p_phone_encrypted TEXT,
-    p_phone_hash TEXT,
     p_language_id INTEGER
 )
-LANGUAGE plpgsql AS $$
+AS $$
+DECLARE
+    v_email_encrypted TEXT;
+    v_email_hash TEXT;
 BEGIN
+    -- Retrieve email_encrypted and email_hash from pending_users
+    SELECT email_encrypted, email_hash
+        INTO v_email_encrypted, v_email_hash
+        FROM pending_users
+        WHERE verification_token = p_verification_token;
+
+    -- Insert new user
     INSERT INTO users (
         username,
+        discriminator,
         email_encrypted,
         email_hash,
         password_hash,
-        phone_encrypted,
-        phone_hash,
         language_id
     )
     VALUES (
         p_username,
-        p_email_encrypted,
-        p_email_hash,
+        p_discriminator,
+        v_email_encrypted,
+        v_email_hash,
         p_password_hash,
-        p_phone_encrypted,
-        p_phone_hash,
         p_language_id
     );
+
+    -- Delete the pending_user entry
+    DELETE FROM pending_users WHERE verification_token = p_verification_token;
 END;
-$$;
+$$ LANGUAGE plpgsql;
