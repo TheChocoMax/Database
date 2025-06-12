@@ -125,7 +125,7 @@
                 "panel": "shared",
                 "close": true
             },
-            "problemMatcher": [],
+            "problemMatcher": []
         },
         {
             "label": "Run Docker Container",
