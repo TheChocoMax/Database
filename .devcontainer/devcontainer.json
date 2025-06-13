@@ -26,6 +26,6 @@
     },
     "postCreateCommand": "initdb -D $PGDATA && pg_ctl -D $PGDATA -o '-k /run/postgresql' -l /tmp/pg.log start && createdb chocomax && pg_ctl -D $PGDATA stop",
     "postStartCommand": "pg_ctl -D $PGDATA -o '-k /run/postgresql' -l /tmp/pg.log start",
-    "postAttachCommand": "sqlfluff fix -v",
+    "postAttachCommand": "sqlfluff fix database/ -v",
     "remoteUser": "vscode"
 }
