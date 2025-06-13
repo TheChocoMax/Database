@@ -6,6 +6,6 @@ BEGIN
     RETURN QUERY
     SELECT discriminator
     FROM users
-    WHERE users.username = p_username;
+    WHERE username = p_username;
 END;
 $$ LANGUAGE plpgsql;
