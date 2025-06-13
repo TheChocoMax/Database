@@ -80,17 +80,14 @@ jobs:
         run: |
           sudo -u "$PG_USER" psql -p "$PGPORT" -d "$PG_DATABASE" -c "CREATE EXTENSION IF NOT EXISTS pgtap;"
 
-      - name: Flatten and load schema SQL files
+      - name: Flatten SQL files
         run: |
-          mkdir flattened-sql
-          find database -type f -name "*.sql" ! -name "*.session.sql" ! -name "*.test.sql" | while read -r file; do
-            clean_path="${file#./}"
-            new_name="${clean_path//\//_}"
-            cp "$file" "flattened-sql/$new_name"
-            echo "✅ Copied: $file → flattened-sql/$new_name"
-          done
+          chmod +x scripts/flatten-sql.sh
+          ./scripts/flatten-sql.sh database flattened-sql
 
-          find flattened-sql -maxdepth 1 -name "*.sql" | while read -r file; do
+      - name: Load schema and seed data
+        run: |
+          find flattened-sql -maxdepth 1 -name "*.sql" | sort | while read -r file; do
             echo "➡️ Running $file..."
             sudo -u postgres psql -p "$PGPORT" -d "$PG_DATABASE" -f "$file"
           done
