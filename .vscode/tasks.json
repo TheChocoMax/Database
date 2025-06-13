@@ -99,10 +99,56 @@
             },
             "presentation": {
                 "close": true
-            },
-            "runOptions": {
-                "runOn": "default"
             }
+        },
+        {
+            "label": "Build Docker Image",
+            "type": "shell",
+            "command": "docker build -t ${input:docker_image_name} .",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "panel": "shared",
+                "close": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Docker Container",
+            "type": "shell",
+            "command": "docker run -d -p 5432:5432 --name ${input:docker_container_name} --env-file .env --security-opt no-new-privileges:true --cap-drop=ALL --cap-add=NET_BIND_SERVICE ${input:docker_image_name}",
+            "presentation": {
+                "panel": "shared",
+                "close": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Remove Docker Container",
+            "type": "shell",
+            "command": "docker stop ${input:docker_container_name} ; docker rm ${input:docker_container_name}",
+            "presentation": {
+                "panel": "shared",
+                "close": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Reset Docker Container",
+            "type": "shell",
+            "dependsOn": [
+                "Remove Docker Container",
+                "Build Docker Image",
+                "Run Docker Container"
+            ],
+            "presentation": {
+                "panel": "shared",
+                "close": true
+            },
+            "dependsOrder": "sequence",
+            "problemMatcher": []
         }
     ],
     "inputs": [
@@ -117,6 +163,18 @@
             "type": "promptString",
             "description": "Enter the database name",
             "default": "chocomax"
+        },
+        {
+            "id": "docker_image_name",
+            "type": "promptString",
+            "description": "Enter the Docker image name",
+            "default": "chocomax-database-image"
+        },
+        {
+            "id": "docker_container_name",
+            "type": "promptString",
+            "description": "Enter the Docker container name",
+            "default": "chocomax-database-container"
         }
     ],
     "options": {
