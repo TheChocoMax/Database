@@ -135,7 +135,7 @@
                 "panel": "shared",
                 "close": true
             },
-            "problemMatcher": [],
+            "problemMatcher": []
         },
         {
             "label": "Remove Docker Container",
@@ -145,7 +145,7 @@
                 "panel": "shared",
                 "close": true
             },
-            "problemMatcher": [],
+            "problemMatcher": []
         },
         {
             "label": "Reset Docker Container",
