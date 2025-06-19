@@ -8,11 +8,6 @@ BEFORE UPDATE ON user_sessions
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at();
 
-CREATE TRIGGER tr_set_updated_at_email_verifications
-BEFORE UPDATE ON email_verifications
-FOR EACH ROW
-EXECUTE FUNCTION update_updated_at();
-
 CREATE TRIGGER tr_set_updated_at_password_resets
 BEFORE UPDATE ON password_resets
 FOR EACH ROW

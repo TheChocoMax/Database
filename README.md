@@ -44,18 +44,18 @@ The database schema consists of the following tables:
 5. **category_translations**: Contains translated names and descriptions for product categories.
 6. **contact_messages**: Stores messages sent through the contact form by users or visitors.
 7. **discount_codes**: Defines promotional discount codes with rules and usage limits.
-8. **email_verifications**: Manages email verification tokens and statuses for user accounts.
-9. **feedback**: Allows users to rate and comment on products they've purchased.
-10. **login_attempts**: Records login attempts with metadata like IP, user agent, and success flag.
-11. **loyalty_program**: Defines promotions such as "buy X get Y" for specific products.
-12. **metrics_events**: Stores anonymous event logs for analytics purposes.
-13. **moderation_actions**: Logs actions taken to moderate users, products, or comments.
-14. **order_delivery_info**: Stores delivery-related information such as address and delivery agent.
-15. **order_items**: Contains product variant items included in each order.
-16. **order_status_history**: Tracks the status changes of orders over time.
-17. **order_timestamps**: Keeps timestamps for different stages in the order lifecycle.
-18. **orders**: Main order records with price, status, and delivery type.
-19. **password_resets**: Stores reset tokens for users to change their passwords securely.
+8. **feedback**: Allows users to rate and comment on products they've purchased.
+9. **login_attempts**: Records login attempts with metadata like IP, user agent, and success flag.
+10. **loyalty_program**: Defines promotions such as "buy X get Y" for specific products.
+11. **metrics_events**: Stores anonymous event logs for analytics purposes.
+12. **moderation_actions**: Logs actions taken to moderate users, products, or comments.
+13. **order_delivery_info**: Stores delivery-related information such as address and delivery agent.
+14. **order_items**: Contains product variant items included in each order.
+15. **order_status_history**: Tracks the status changes of orders over time.
+16. **order_timestamps**: Keeps timestamps for different stages in the order lifecycle.
+17. **orders**: Main order records with price, status, and delivery type.
+18. **password_resets**: Stores reset tokens for users to change their passwords securely.
+19. **pending_users**: Manages email verification tokens and for new user.
 20. **product_categories**: Defines categories to group products (e.g., Chocolate, Gifts).
 21. **product_comments**: Stores user comments on products, optionally moderated.
 22. **product_images**: Manages images associated with products and their variants.
