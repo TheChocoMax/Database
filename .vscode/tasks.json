@@ -18,7 +18,9 @@
             "label": "Flatten SQL Files",
             "type": "shell",
             "command": "./scripts/flatten-sql.sh",
-            "dependsOn": ["Start Database"],
+            "dependsOn": [
+                "Start Database"
+            ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -28,8 +30,13 @@
             "label": "Rebuild Database",
             "type": "shell",
             "command": "./scripts/rebuild-db.sh",
-            "args": ["${input:db_username}", "${input:db_name}"],
-            "dependsOn": ["Flatten SQL Files"],
+            "args": [
+                "${input:db_username}",
+                "${input:db_name}"
+            ],
+            "dependsOn": [
+                "Flatten SQL Files"
+            ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -81,7 +88,9 @@
             "label": "Run Unit Tests",
             "type": "shell",
             "command": "pg_prove -Q -d ${input:db_name} -U ${input:db_username} database/tests/*.test.sql",
-            "dependsOn": ["Full Database Rebuild"],
+            "dependsOn": [
+                "Full Database Rebuild"
+            ],
             "problemMatcher": [],
             "group": {
                 "kind": "test",
@@ -103,6 +112,55 @@
             "runOptions": {
                 "runOn": "default"
             }
+        },
+        {
+            "label": "Build Docker Image",
+            "type": "shell",
+            "command": "docker build -t ${input:docker_image_name} .",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "panel": "shared",
+                "close": true
+            },
+            "problemMatcher": [],
+        },
+        {
+            "label": "Run Docker Container",
+            "type": "shell",
+            "command": "docker run -d -p 5432:5432 --name ${input:docker_container_name} --env-file .env --security-opt no-new-privileges:true --cap-drop=ALL --cap-add=NET_BIND_SERVICE ${input:docker_image_name}",
+            "presentation": {
+                "panel": "shared",
+                "close": true
+            },
+            "problemMatcher": [],
+        },
+        {
+            "label": "Remove Docker Container",
+            "type": "shell",
+            "command": "docker stop ${input:docker_container_name} ; docker rm ${input:docker_container_name}",
+            "presentation": {
+                "panel": "shared",
+                "close": true
+            },
+            "problemMatcher": [],
+        },
+        {
+            "label": "Reset Docker Container",
+            "type": "shell",
+            "dependsOn": [
+                "Remove Docker Container",
+                "Build Docker Image",
+                "Run Docker Container"
+            ],
+            "presentation": {
+                "panel": "shared",
+                "close": true
+            },
+            "dependsOrder": "sequence",
+            "problemMatcher": []
         }
     ],
     "inputs": [
@@ -117,6 +175,18 @@
             "type": "promptString",
             "description": "Enter the database name",
             "default": "chocomax"
+        },
+        {
+            "id": "docker_image_name",
+            "type": "promptString",
+            "description": "Enter the Docker image name",
+            "default": "chocomax-database-image"
+        },
+        {
+            "id": "docker_container_name",
+            "type": "promptString",
+            "description": "Enter the Docker container name",
+            "default": "chocomax-database-container"
         }
     ],
     "options": {
