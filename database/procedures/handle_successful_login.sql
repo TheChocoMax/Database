@@ -7,7 +7,7 @@ CREATE OR REPLACE PROCEDURE handle_successful_login(
 AS $$
 BEGIN
     -- Update login timestamp
-    UPDATE users SET last_login_at = NOW(), updated_at = NOW()
+    UPDATE users SET last_login_at = NOW()
     WHERE user_id = p_user_id;
 
     -- Log success

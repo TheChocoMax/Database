@@ -38,7 +38,7 @@ SELECT has_table('cart_items', 'Table exists');
 SELECT has_table('orders', 'Table exists');
 SELECT has_table('order_items', 'Table exists');
 SELECT has_table('order_status_histories', 'Table exists');
-SELECT has_table('order_delivery_infos', 'Table exists');
+SELECT has_table('order_delivery_informations', 'Table exists');
 SELECT has_table('order_timestamps', 'Table exists');
 SELECT has_table('discount_codes', 'Table exists');
 SELECT has_table('user_discounts', 'Table exists');

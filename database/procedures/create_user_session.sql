@@ -1,10 +1,10 @@
 CREATE OR REPLACE PROCEDURE create_user_session_token(
     p_user_id UUID,
     p_session_token TEXT,
-    p_device_info JSONB DEFAULT NULL,
-    p_ip_address INET DEFAULT NULL
+    p_device_info JSONB,
+    p_ip_address INET,
+    p_user_agent TEXT
 )
-LANGUAGE plpgsql
 AS $$
 BEGIN
     INSERT INTO user_sessions (
@@ -14,8 +14,7 @@ BEGIN
         device_info,
         ip_address,
         expires_at,
-        created_at,
-        updated_at
+        user_agent
     )
     VALUES (
         p_user_id,
@@ -24,19 +23,18 @@ BEGIN
         p_device_info,
         p_ip_address,
         NOW() + INTERVAL '1 hour',
-        current_timestamp,
-        current_timestamp
+        p_user_agent
     );
 END;
-$$;
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE PROCEDURE create_user_refresh_token(
     p_user_id UUID,
     p_refresh_token TEXT,
-    p_device_info JSONB DEFAULT NULL,
-    p_ip_address INET DEFAULT NULL
+    p_device_info JSONB,
+    p_ip_address INET,
+    p_user_agent TEXT
 )
-LANGUAGE plpgsql
 AS $$
 BEGIN
     INSERT INTO user_sessions (
@@ -46,8 +44,7 @@ BEGIN
         device_info,
         ip_address,
         expires_at,
-        created_at,
-        updated_at
+        user_agent
     )
     VALUES (
         p_user_id,
@@ -56,8 +53,7 @@ BEGIN
         p_device_info,
         p_ip_address,
         NOW() + INTERVAL '7 days',
-        current_timestamp,
-        current_timestamp
+        p_user_agent
     );
 END;
-$$;
+$$ LANGUAGE plpgsql;
