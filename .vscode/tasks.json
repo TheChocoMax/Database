@@ -18,7 +18,9 @@
             "label": "Flatten SQL Files",
             "type": "shell",
             "command": "./scripts/flatten-sql.sh",
-            "dependsOn": ["Start Database"],
+            "dependsOn": [
+                "Start Database"
+            ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -28,8 +30,13 @@
             "label": "Rebuild Database",
             "type": "shell",
             "command": "./scripts/rebuild-db.sh",
-            "args": ["${input:db_username}", "${input:db_name}"],
-            "dependsOn": ["Flatten SQL Files"],
+            "args": [
+                "${input:db_username}",
+                "${input:db_name}"
+            ],
+            "dependsOn": [
+                "Flatten SQL Files"
+            ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -81,7 +88,9 @@
             "label": "Run Unit Tests",
             "type": "shell",
             "command": "pg_prove -Q -d ${input:db_name} -U ${input:db_username} database/tests/*.test.sql",
-            "dependsOn": ["Full Database Rebuild"],
+            "dependsOn": [
+                "Full Database Rebuild"
+            ],
             "problemMatcher": [],
             "group": {
                 "kind": "test",
