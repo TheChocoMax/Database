@@ -17,6 +17,7 @@ mkdir -p "$DEST_DIR"
 find "$SRC_DIR" -type f -name "*.sql" ! -name "*.session.sql" ! -name "*.test.sql" | while read -r file; do
 	rel_path="${file#"$SRC_DIR"/}"
 	new_name=$(echo "$rel_path" | sed 's|/|_|g')
-	cp "$file" "$DEST_DIR/$new_name"
-	echo "✅ Copied: $file → $DEST_DIR/$new_name"
+	depth=$(echo "$rel_path" | awk -F'/' '{print NF-1}')
+	cp "$file" "$DEST_DIR/${depth}${new_name}"
+	echo "✅ Copied: $file → $DEST_DIR/${depth}${new_name}"
 done
