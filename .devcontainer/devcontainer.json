@@ -1,6 +1,6 @@
 {
     "name": "ChocoMax Database Development Container",
-    "dockerFile": "Dockerfile",
+    "image": "ghcr.io/themaximousse/database-devcontainer:latest",
     "runArgs": [
         "--cap-add=CHOWN",
         "--cap-add=SETGID",

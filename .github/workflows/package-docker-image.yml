@@ -1,42 +1,103 @@
 ---
-name: Release Docker Image
+name: Package Docker Images
 
 permissions:
   packages: write
-  contents: read
+  contents: write
 
 on:
-  release:
-    types: [published]
+  push:
+    branches:
+      - main
+    paths:
+      - 'database/**/*.sql'
+      - 'scripts/**/*.sh'
+      - '.devcontainer/**'
+      - '.github/workflows/package-docker-images.yml'
 
 jobs:
-  docker:
+  build-docker-images:
+    name: Build and push ${{ matrix.name }} image
     runs-on: ubuntu-latest
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: database
+            context: ./
+            dockerfile: Dockerfile
+            path_filter: ./
+            needs_api_url: true
+          - name: database-devcontainer
+            context: ./.devcontainer
+            dockerfile: .devcontainer/Dockerfile
+            path_filter: .devcontainer/
+            needs_api_url: true
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if build is needed
+        id: check_changes
+        run: |
+          # Check if files in the component's directory were changed
+          if git diff --name-only HEAD~1 HEAD | grep -q "^${{ matrix.path_filter }}" || \
+             git diff --name-only HEAD~1 HEAD | grep -q "^\.github/workflows/package-docker-images\.yml"; then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Extract version
+        if: steps.check_changes.outputs.should_build == 'true'
         id: version
         run: |
-          RAW_TAG=${GITHUB_REF#refs/tags/}
-          VERSION=$(echo "$RAW_TAG" | sed -E 's/^v?([0-9]+\.[0-9]+\.[0-9]+).*$/\1/')
+          VERSION=$(date +%y.%m.%d.%H.%M)
           echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Docker login to GHCR
+      - name: Validate Dockerfile exists
+        if: steps.check_changes.outputs.should_build == 'true'
+        run: |
+          test -f "${{ matrix.dockerfile }}" || (echo "Dockerfile not found at ${{ matrix.dockerfile }}" && exit 1)
+
+      - name: Set up QEMU
+        if: steps.check_changes.outputs.should_build == 'true'
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        if: steps.check_changes.outputs.should_build == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        if: steps.check_changes.outputs.should_build == 'true'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Normalize image name (lowercase)
-        run: |
-          echo "REPO_LOWER=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_ENV"
+      - name: Build and push ${{ matrix.name }} image
+        if: steps.check_changes.outputs.should_build == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.context }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: ${{ matrix.needs_api_url == true && format('PUBLIC_API_URL={0}', secrets.PUBLIC_API_URL) || '' }}
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ steps.version.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:latest
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
 
-      - name: Build and push Docker image
-        run: |
-          IMAGE="ghcr.io/${REPO_LOWER}:${{ steps.version.outputs.tag }}"
-          echo "🔨 Building image: $IMAGE"
-          docker build -t "$IMAGE" .
-          docker push "$IMAGE"
+      - name: Generate SBOM
+        if: steps.check_changes.outputs.should_build == 'true'
+        uses: anchore/sbom-action@v0
+        with:
+          image: ghcr.io/${{ github.repository_owner }}/${{ matrix.name }}:${{ steps.version.outputs.tag }}
+          format: spdx-json
+          upload-release-assets: false
+          artifact-name: sbom-${{ matrix.name }}-${{ steps.version.outputs.tag }}
