@@ -58,6 +58,11 @@ jobs:
           VERSION=$(date +%y.%m.%d.%H.%M)
           echo "tag=$VERSION" >> "$GITHUB_OUTPUT"
 
+      - name: Normalize repository owner
+        if: steps.check_changes.outputs.should_build == 'true'
+        id: repo_owner
+        run: echo "name=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
       - name: Validate Dockerfile exists
         if: steps.check_changes.outputs.should_build == 'true'
         run: |
