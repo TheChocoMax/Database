@@ -27,7 +27,7 @@ jobs:
           - name: database
             context: ./
             dockerfile: Dockerfile
-            path_filter: ./database/
+            path_filter: database/
             needs_api_url: true
           - name: database-devcontainer
             context: ./.devcontainer
