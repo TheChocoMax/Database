@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS pgtap;
 
 BEGIN;
 
-SELECT plan(86);
+SELECT plan(109);
 
 -- =============================================================================
 -- TABLE EXISTENCE TESTS
@@ -144,8 +144,49 @@ SELECT col_has_default('product_variants', 'is_test', 'product_variants.is_test 
 SELECT col_has_default('product_images', 'is_primary', 'product_images.is_primary has default');
 
 -- =============================================================================
--- TODO: INDEX TESTS
+-- INDEX TESTS
 -- =============================================================================
+
+-- Products table indexes
+SELECT has_index('products', 'idx_products_enabled', 'Index idx_products_enabled exists');
+SELECT has_index('products', 'idx_products_price', 'Index idx_products_price exists');
+SELECT has_index('products', 'idx_products_created_at', 'Index idx_products_created_at exists');
+SELECT has_index('products', 'idx_products_updated_at', 'Index idx_products_updated_at exists');
+SELECT has_index('products', 'idx_products_enabled_price', 'Index idx_products_enabled_price exists');
+
+-- Product variants indexes
+SELECT has_index('product_variants', 'idx_product_variants_product_id', 'Index idx_product_variants_product_id exists');
+SELECT has_index('product_variants', 'idx_product_variants_non_test', 'Index idx_product_variants_non_test exists');
+SELECT has_index('product_variants', 'idx_product_variants_size', 'Index idx_product_variants_size exists');
+
+-- Product images indexes
+SELECT has_index('product_images', 'idx_product_images_product_id', 'Index idx_product_images_product_id exists');
+SELECT has_index('product_images', 'idx_product_images_variant_id', 'Index idx_product_images_variant_id exists');
+SELECT has_index('product_images', 'idx_product_images_primary', 'Index idx_product_images_primary exists');
+
+-- Product categories indexes
+SELECT has_index('product_categories', 'idx_product_categories_name', 'Index idx_product_categories_name exists');
+
+-- Internationalization indexes
+SELECT has_index('translations', 'idx_translations_key_lang', 'Index idx_translations_key_lang exists');
+SELECT has_index('translations', 'idx_translations_language', 'Index idx_translations_language exists');
+
+SELECT has_index('product_translations', 'idx_product_translations_product_lang', 'Index idx_product_translations_product_lang exists');
+SELECT has_index('product_translations', 'idx_product_translations_language', 'Index idx_product_translations_language exists');
+
+SELECT has_index('category_translations', 'idx_category_translations_category_lang', 'Index idx_category_translations_category_lang exists');
+SELECT has_index('category_translations', 'idx_category_translations_language', 'Index idx_category_translations_language exists');
+
+-- Languages index for i18n lookups
+SELECT has_index('languages', 'idx_languages_iso_code', 'Index idx_languages_iso_code exists');
+
+-- Full-text search indexes (GIN indexes)
+SELECT has_index('products', 'idx_products_search', 'Index idx_products_search exists');
+SELECT has_index('product_translations', 'idx_product_translations_search', 'Index idx_product_translations_search exists');
+
+-- Composite indexes for common query patterns
+SELECT has_index('products', 'idx_products_enabled_created', 'Index idx_products_enabled_created exists');
+SELECT has_index('products', 'idx_products_enabled_price_created', 'Index idx_products_enabled_price_created exists');
 
 SELECT finish();
 
