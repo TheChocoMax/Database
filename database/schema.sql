@@ -2,6 +2,15 @@
 
 CREATE TYPE delivery_type AS ENUM ('pickup', 'delivery');
 
+CREATE TYPE pagination_info AS (
+    current_page INTEGER,
+    page_size INTEGER,          -- Default is 12 for listings, 24 for search, 36 for admin
+    total_items BIGINT,
+    total_pages INTEGER,
+    has_next BOOLEAN,
+    has_previous BOOLEAN
+);
+
 -- Languages (i18n) - followed by translation tables later in the schema
 
 CREATE TABLE languages (
