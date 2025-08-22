@@ -1,5 +1,5 @@
 {
-    "name": "ChocoMax Database Development Container",
+    "name": "ChocoMax Database",
     "image": "ghcr.io/themaximousse/database-devcontainer:latest",
     "runArgs": [
         "--cap-add=CHOWN",
