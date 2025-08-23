@@ -1,8 +1,3 @@
--- =====================================
--- SAMPLE DATA FOR CATEGORIES, ATTRIBUTES & TAGS SYSTEM
--- Replace/extend your seed_data.sql file with this data
--- =====================================
-
 -- Insert languages first
 INSERT INTO languages (iso_code, english_name, native_name)
 VALUES ('fr', 'French', 'Français'), ('en', 'English', 'English'), ('es', 'Spanish', 'Español');

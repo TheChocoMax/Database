@@ -1,8 +1,3 @@
--- =====================================
--- FIXED functions.test.sql
--- Replace: database/tests/functions.test.sql
--- =====================================
-
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
 BEGIN;
