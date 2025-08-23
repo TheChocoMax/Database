@@ -1,11 +1,3 @@
--- =====================================
--- UPDATED TEST FILES FOR NEW SCHEMA
--- Replace your existing test files with these updated versions
--- =====================================
-
--- 1. UPDATED schema.test.sql
--- Replace: database/tests/schema.test.sql
-
 CREATE EXTENSION IF NOT EXISTS pgtap;
 
 BEGIN;
