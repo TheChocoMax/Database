@@ -2,7 +2,10 @@
 INSERT INTO languages (iso_code, english_name, native_name)
 VALUES ('fr', 'French', 'Français'), ('en', 'English', 'English'), ('es', 'Spanish', 'Español');
 
--- 1. INSERT PRODUCT CATEGORIES (main grouping)
+-- =============================================================================
+-- INSERT PRODUCT CATEGORIES (main grouping)
+-- =============================================================================
+
 INSERT INTO product_categories (category_name, category_color, category_description, display_order) VALUES
 ('Gâteaux', '#FF6B6B', 'Birthday cakes and celebration treats', 1),
 ('Viennoiseries', '#96CEB4', 'French pastries and croissants', 2),
@@ -10,7 +13,10 @@ INSERT INTO product_categories (category_name, category_color, category_descript
 ('Bouchées', '#45B7D1', 'Small bite-sized treats', 4),
 ('Pain', '#DDA0DD', 'Breads and traditional baked goods', 5);
 
--- 2. INSERT PRODUCT TAGS (marketing/seasonal)
+-- =============================================================================
+-- INSERT PRODUCT TAGS (marketing/seasonal)
+-- =============================================================================
+
 INSERT INTO product_tags (tag_name, tag_color, tag_description, display_order) VALUES
 ('Bestseller', '#FFD700', 'Most popular products', 1),
 ('Seasonal', '#FF7675', 'Limited time seasonal items', 2),
@@ -20,7 +26,9 @@ INSERT INTO product_tags (tag_name, tag_color, tag_description, display_order) V
 ('Christmas', '#00B894', 'Holiday specialties', 6),
 ('New', '#00CEC9', 'Recently added products', 7);
 
--- 3. INSERT SAMPLE PRODUCTS WITH NEW STRUCTURE
+-- =============================================================================
+-- INSERT SAMPLE PRODUCTS WITH NEW STRUCTURE
+-- =============================================================================
 
 -- Variant-based product (Macarons - quantity pricing)
 INSERT INTO products (
@@ -114,7 +122,9 @@ INSERT INTO products (
     FALSE
 );
 
--- 4. INSERT PRODUCT ATTRIBUTES (structured data)
+-- =============================================================================
+-- INSERT PRODUCT ATTRIBUTES (structured data)
+-- =============================================================================
 
 -- Allergen attributes
 INSERT INTO product_attributes (product_id, attribute_name, attribute_value, attribute_color) VALUES
@@ -176,7 +186,9 @@ INSERT INTO product_tag_assignments (product_id, product_tag_id) VALUES
 (4, 1), -- Bestseller
 (4, 7); -- New
 
--- 6. INSERT CUSTOMIZATION OPTIONS FOR CONFIGURABLE PRODUCTS
+-- =============================================================================
+-- INSERT CUSTOMIZATION OPTIONS FOR CONFIGURABLE PRODUCTS
+-- =============================================================================
 
 INSERT INTO customization_options (option_name, option_type, is_required, display_order) VALUES
 ('Type de crème', 'single_select', TRUE, 1),
