@@ -23,6 +23,8 @@
     ],
     "sqltools.useNodeRuntime": false,
     "triggerTaskOnSave.tasks": {
-        "Lint SQL File": ["database/**/*.sql"]
+        "Lint SQL File": [
+            "database/**/*.sql"
+        ]
     }
 }
