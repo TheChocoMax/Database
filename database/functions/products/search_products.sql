@@ -7,6 +7,7 @@ CREATE OR REPLACE FUNCTION search_products(
     p_tag_filter INTEGER [] DEFAULT NULL,
     p_attribute_filter JSONB DEFAULT NULL
 ) RETURNS TABLE (
+    -- Core product data
     product_id INTEGER,
     product_name TEXT,
     product_description TEXT,
@@ -14,27 +15,45 @@ CREATE OR REPLACE FUNCTION search_products(
     price NUMERIC(10, 2),
     base_price NUMERIC(10, 2),
     image_url TEXT,
-    category JSONB,
-    attributes JSONB,
-    tags JSONB,
-    rank REAL,
+    preparation_time_hours INTEGER,
+    min_order_hours INTEGER,
+    serving_info TEXT,
+    is_customizable BOOLEAN,
+    created_at TIMESTAMPTZ,
+
+    -- Category data
+    category_id INTEGER,
+    category_name TEXT,
+    category_color TEXT,
+
+    -- Search relevance
+    search_rank REAL,
+
+    -- Related data counts
+    attribute_count INTEGER,
+    tag_count INTEGER,
+
+    -- Pagination info
     pagination PAGINATION_INFO
 ) AS $$
+DECLARE
+    v_total_count BIGINT;
+    v_offset INTEGER := (p_page - 1) * p_size;
+    v_query tsquery;
 BEGIN
-    RETURN QUERY
-    WITH search_query AS (
-        SELECT websearch_to_tsquery('english', p_search_term) as query
-    ),
-    filtered_products AS (
+    -- Prepare search query
+    v_query := websearch_to_tsquery('english', p_search_term);
+
+    -- Get total count for pagination
+    WITH search_results AS (
         SELECT DISTINCT p.product_id
         FROM products p
         LEFT JOIN product_translations pt ON p.product_id = pt.product_id
             AND pt.language_id = (SELECT language_id FROM languages WHERE iso_code = p_language_iso)
-        CROSS JOIN search_query sq
         WHERE p.is_enabled = TRUE
         AND (
-            to_tsvector('english', p.product_name || ' ' || COALESCE(p.product_description, '')) @@ sq.query
-            OR to_tsvector('english', COALESCE(pt.product_name, '') || ' ' || COALESCE(pt.product_description, '')) @@ sq.query
+            to_tsvector('english', p.product_name || ' ' || COALESCE(p.product_description, '')) @@ v_query
+            OR to_tsvector('english', COALESCE(pt.product_name, '') || ' ' || COALESCE(pt.product_description, '')) @@ v_query
         )
         AND (p_category_filter IS NULL OR p.category_id = p_category_filter)
         AND (p_tag_filter IS NULL OR EXISTS (
@@ -42,13 +61,31 @@ BEGIN
             WHERE pta.product_id = p.product_id
             AND pta.product_tag_id = ANY(p_tag_filter)
         ))
-    ),
-    paginated_results AS (
-        SELECT fp.product_id,
-               ROW_NUMBER() OVER (ORDER BY p.created_at DESC) as rn
-        FROM filtered_products fp
-        JOIN products p ON fp.product_id = p.product_id
-        LIMIT p_size OFFSET (p_page - 1) * p_size
+    )
+    SELECT COUNT(*) INTO v_total_count FROM search_results;
+
+    RETURN QUERY
+    WITH search_results AS (
+        SELECT
+            p.product_id,
+            ts_rank_cd(
+                to_tsvector('english', p.product_name || ' ' || COALESCE(p.product_description, '')),
+                v_query
+            ) as rank
+        FROM products p
+        LEFT JOIN product_translations pt ON p.product_id = pt.product_id
+            AND pt.language_id = (SELECT language_id FROM languages WHERE iso_code = p_language_iso)
+        WHERE p.is_enabled = TRUE
+        AND (
+            to_tsvector('english', p.product_name || ' ' || COALESCE(p.product_description, '')) @@ v_query
+            OR to_tsvector('english', COALESCE(pt.product_name, '') || ' ' || COALESCE(pt.product_description, '')) @@ v_query
+        )
+        AND (p_category_filter IS NULL OR p.category_id = p_category_filter)
+        AND (p_tag_filter IS NULL OR EXISTS (
+            SELECT 1 FROM product_tag_assignments pta
+            WHERE pta.product_id = p.product_id
+            AND pta.product_tag_id = ANY(p_tag_filter)
+        ))
     )
     SELECT
         p.product_id,
@@ -58,45 +95,36 @@ BEGIN
         p.price,
         p.base_price,
         p.image_url,
-        -- Category
-        CASE WHEN p.category_id IS NOT NULL THEN
-            jsonb_build_object(
-                'category_id', pc.category_id,
-                'name', COALESCE(ct.category_name, pc.category_name),
-                'color', pc.category_color::TEXT
-            )
-        ELSE NULL END as category,
-        -- Attributes (simplified approach - no nested aggregates)
-        (SELECT jsonb_agg(
-            jsonb_build_object(
-                'name', pa.attribute_name,
-                'value', pa.attribute_value,
-                'color', pa.attribute_color::TEXT
-            )
-        ) FROM product_attributes pa WHERE pa.product_id = p.product_id
-        ) as attributes,
-        -- Tags
-        (SELECT jsonb_agg(
-            jsonb_build_object(
-                'tag_id', pt2.product_tag_id,
-                'name', COALESCE(ptt.tag_name, pt2.tag_name),
-                'color', pt2.tag_color::TEXT
-            )
-        ) FROM product_tag_assignments pta
-        JOIN product_tags pt2 ON pta.product_tag_id = pt2.product_tag_id
-        LEFT JOIN product_tag_translations ptt ON pt2.product_tag_id = ptt.product_tag_id
-            AND ptt.language_id = (SELECT language_id FROM languages WHERE iso_code = p_language_iso)
-        WHERE pta.product_id = p.product_id AND pt2.is_enabled = TRUE
-        ) as tags,
-        -- Search ranking
-        0.5::REAL as rank, -- Simplified ranking
-        get_pagination_info(p_page, p_size, (SELECT COUNT(*) FROM filtered_products)::BIGINT) as pagination
-    FROM paginated_results pr
-    JOIN products p ON pr.product_id = p.product_id
+        p.preparation_time_hours,
+        p.min_order_hours,
+        p.serving_info,
+        p.is_customizable,
+        p.created_at,
+
+        -- Category data
+        pc.category_id,
+        COALESCE(ct.category_name, pc.category_name) as category_name,
+        pc.category_color::TEXT,
+
+        -- Search relevance
+        sr.rank as search_rank,
+
+        -- Related data counts
+        (SELECT COUNT(*)::INTEGER FROM product_attributes pa WHERE pa.product_id = p.product_id) as attribute_count,
+        (SELECT COUNT(*)::INTEGER FROM product_tag_assignments pta
+         JOIN product_tags pt ON pta.product_tag_id = pt.product_tag_id
+         WHERE pta.product_id = p.product_id AND pt.is_enabled = TRUE) as tag_count,
+
+        -- Pagination info
+        get_pagination_info(p_page, p_size, v_total_count) as pagination
+
+    FROM search_results sr
+    JOIN products p ON sr.product_id = p.product_id
     LEFT JOIN product_categories pc ON p.category_id = pc.category_id
     LEFT JOIN category_translations ct ON pc.category_id = ct.category_id
         AND ct.language_id = (SELECT language_id FROM languages WHERE iso_code = p_language_iso)
     LEFT JOIN LATERAL get_product_translation(p.product_id, p_language_iso) tr ON true
-    ORDER BY pr.rn;
+    ORDER BY sr.rank DESC, p.created_at DESC
+    LIMIT p_size OFFSET v_offset;
 END;
 $$ LANGUAGE plpgsql;

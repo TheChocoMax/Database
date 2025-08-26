@@ -8,6 +8,7 @@ CREATE OR REPLACE FUNCTION get_products_paginated(
     p_tag_filter INTEGER [] DEFAULT NULL,
     p_attribute_filter JSONB DEFAULT NULL
 ) RETURNS TABLE (
+    -- Core product data
     product_id INTEGER,
     product_name TEXT,
     product_description TEXT,
@@ -20,14 +21,36 @@ CREATE OR REPLACE FUNCTION get_products_paginated(
     serving_info TEXT,
     is_customizable BOOLEAN,
     created_at TIMESTAMPTZ,
-    category JSONB,
-    variants JSONB,
-    attributes JSONB,
-    tags JSONB,
+
+    -- Category data
+    category_id INTEGER,
+    category_name TEXT,
+    category_color TEXT,
+    category_description TEXT,
+
+    -- Variant indicators
+    has_variants BOOLEAN,
+    default_variant_id INTEGER,
+    variant_count INTEGER,
+
+    -- Related data counts
+    attribute_count INTEGER,
+    tag_count INTEGER,
+    image_count INTEGER,
+
+    -- Pagination info
     pagination PAGINATION_INFO
 ) AS $$
+DECLARE
+    v_total_count BIGINT;
+    v_offset INTEGER := (p_page - 1) * p_size;
 BEGIN
-    -- No complex filtering for now
+    -- Get total count for pagination
+    SELECT COUNT(*) INTO v_total_count
+    FROM products p
+    WHERE p.is_enabled = TRUE
+    AND (p_category_filter IS NULL OR p.category_id = p_category_filter);
+
     RETURN QUERY
     SELECT
         p.product_id,
@@ -42,59 +65,46 @@ BEGIN
         p.serving_info,
         p.is_customizable,
         p.created_at,
-        -- Category
-        CASE WHEN p.category_id IS NOT NULL THEN
-            jsonb_build_object(
-                'category_id', pc.category_id,
-                'name', COALESCE(ct.category_name, pc.category_name),
-                'color', pc.category_color::TEXT,
-                'description', COALESCE(ct.category_description, pc.category_description)
-            )
-        ELSE NULL END as category,
-        -- Variants
-        (SELECT jsonb_agg(
-            jsonb_build_object(
-                'variant_id', pv.product_variant_id,
-                'name', pv.variant_name,
-                'quantity', pv.quantity,
-                'price', COALESCE(pv.price_override, p.price),
-                'serving_size', pv.serving_size,
-                'is_default', pv.is_default
-            ) ORDER BY pv.display_order
-        ) FROM product_variants pv
-        WHERE pv.product_id = p.product_id AND pv.is_test = FALSE
-        ) as variants,
-        -- Attributes (simplified - no nested aggregates)
-        (SELECT jsonb_agg(
-            jsonb_build_object(
-                'name', pa.attribute_name,
-                'value', pa.attribute_value,
-                'color', pa.attribute_color::TEXT
-            )
-        ) FROM product_attributes pa WHERE pa.product_id = p.product_id
-        ) as attributes,
-        -- Tags
-        (SELECT jsonb_agg(
-            jsonb_build_object(
-                'tag_id', pt.product_tag_id,
-                'name', COALESCE(ptt.tag_name, pt.tag_name),
-                'color', pt.tag_color::TEXT,
-                'description', COALESCE(ptt.tag_description, pt.tag_description)
-            ) ORDER BY pt.display_order
-        ) FROM product_tag_assignments pta
-        JOIN product_tags pt ON pta.product_tag_id = pt.product_tag_id
-        LEFT JOIN product_tag_translations ptt ON pt.product_tag_id = ptt.product_tag_id
-            AND ptt.language_id = (SELECT language_id FROM languages WHERE iso_code = p_language_iso)
-        WHERE pta.product_id = p.product_id AND pt.is_enabled = TRUE
-        ) as tags,
-        get_pagination_info(p_page, p_size, (SELECT COUNT(*) FROM products WHERE is_enabled = TRUE)::BIGINT) as pagination
+
+        -- Category data
+        pc.category_id,
+        COALESCE(ct.category_name, pc.category_name) as category_name,
+        pc.category_color::TEXT,
+        COALESCE(ct.category_description, pc.category_description) as category_description,
+
+        -- Variant indicators
+        (p.product_type = 'variant_based') as has_variants,
+        (SELECT product_variant_id FROM product_variants pv
+         WHERE pv.product_id = p.product_id AND pv.is_default = TRUE AND pv.is_test = FALSE
+         LIMIT 1) as default_variant_id,
+        (SELECT COUNT(*)::INTEGER FROM product_variants pv
+         WHERE pv.product_id = p.product_id AND pv.is_test = FALSE) as variant_count,
+
+        -- Related data counts
+        (SELECT COUNT(*)::INTEGER FROM product_attributes pa WHERE pa.product_id = p.product_id) as attribute_count,
+        (SELECT COUNT(*)::INTEGER FROM product_tag_assignments pta
+         JOIN product_tags pt ON pta.product_tag_id = pt.product_tag_id
+         WHERE pta.product_id = p.product_id AND pt.is_enabled = TRUE) as tag_count,
+        (SELECT COUNT(*)::INTEGER FROM product_images pi WHERE pi.product_id = p.product_id) as image_count,
+
+        -- Pagination info
+        get_pagination_info(p_page, p_size, v_total_count) as pagination
+
     FROM products p
     LEFT JOIN product_categories pc ON p.category_id = pc.category_id
     LEFT JOIN category_translations ct ON pc.category_id = ct.category_id
         AND ct.language_id = (SELECT language_id FROM languages WHERE iso_code = p_language_iso)
     LEFT JOIN LATERAL get_product_translation(p.product_id, p_language_iso) tr ON true
     WHERE p.is_enabled = TRUE
-    ORDER BY p.created_at DESC
-    LIMIT p_size OFFSET (p_page - 1) * p_size;
+    AND (p_category_filter IS NULL OR p.category_id = p_category_filter)
+    ORDER BY
+        CASE WHEN p_sort_by = 'created_at' AND p_sort_order = 'DESC' THEN p.created_at END DESC,
+        CASE WHEN p_sort_by = 'created_at' AND p_sort_order = 'ASC' THEN p.created_at END ASC,
+        CASE WHEN p_sort_by = 'price' AND p_sort_order = 'DESC' THEN COALESCE(p.price, p.base_price) END DESC,
+        CASE WHEN p_sort_by = 'price' AND p_sort_order = 'ASC' THEN COALESCE(p.price, p.base_price) END ASC,
+        CASE WHEN p_sort_by = 'name' AND p_sort_order = 'DESC' THEN COALESCE(tr.product_name, p.product_name) END DESC,
+        CASE WHEN p_sort_by = 'name' AND p_sort_order = 'ASC' THEN COALESCE(tr.product_name, p.product_name) END ASC,
+        p.product_id
+    LIMIT p_size OFFSET v_offset;
 END;
 $$ LANGUAGE plpgsql;
