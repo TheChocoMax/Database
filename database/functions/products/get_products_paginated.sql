@@ -27,7 +27,7 @@ CREATE OR REPLACE FUNCTION get_products_paginated(
     pagination PAGINATION_INFO
 ) AS $$
 BEGIN
-    -- Simplified version without complex filtering for now
+    -- No complex filtering for now
     RETURN QUERY
     SELECT
         p.product_id,
