@@ -58,9 +58,9 @@ BEGIN
 
         -- Variant indicators
         (p.product_type = 'variant_based') as has_variants,
-        (SELECT product_variant_id FROM product_variants
-         WHERE product_id = p.product_id AND is_default = TRUE AND is_test = FALSE
-         LIMIT 1) as default_variant_id,
+        (SELECT pv.product_variant_id FROM product_variants pv
+        WHERE pv.product_id = p.product_id AND pv.is_default = TRUE AND pv.is_test = FALSE
+        LIMIT 1) as default_variant_id,
 
         -- Customization indicator
         (p.product_type = 'configurable') as has_customization_options,
